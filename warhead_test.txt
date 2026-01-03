@@ -1,0 +1,12 @@
+FS(=O)(=O)c1ccc2c(c1)CN(C2=O)C3CCC(=O)NC3=O
+FS(=O)(=O)Oc1ccc2c(c1)CN(C2=O)C3CCC(=O)NC3=O
+O=C1CCC(N2Cc3ccc(S(=O)(=O)n4nccn4)cc3C2=O)C(=O)N1
+O=C1CCC(N2Cc3ccc(S(=O)(=O)n4cncn4)cc3C2=O)C(=O)N1
+FS(=O)(=O)Oc1ccc2c(c1)CN(C2=O)C3CCC(=O)NC3=O
+FS(=O)(=O)c1cc2c(cc1)CN(C2=O)C3CCC(=O)NC3=O
+FS(=O)(=O)c1cccc2c1CN(C2=O)C3CCC(=O)NC3=O
+FS(=O)(=O)c1cccc(c1)CC(=O)NC2CCC(=O)NC2=O
+FS(=O)(=O)c1ccc(cc1)CC(=O)NC2CCC(=O)NC2=O
+Oc1ccc2c(c1)CN(C2=O)C3CCC(=O)NC3=O
+O=C1CCC(c2cccc(OS(=O)(=O)F)c2)C(=O)N1
+FS(=O)(=O)c1ccc2c(c1)CN(C2=O)C3CCC(=O)NC3=O
