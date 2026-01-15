@@ -17,6 +17,8 @@ Used for molecular docking with AutoDock Vina, RDKit molecular manipulations, an
 ```bash
 conda env create -f environment_vina.yml
 conda activate vina
+# Validate installation
+python validate_environment.py vina
 ```
 
 **Required for cells:** Cell 1, Cell 2, Cell 3, and Cell 17 (marked with `# conda vina env`)
@@ -27,6 +29,8 @@ Used for OpenMM molecular dynamics simulations and protein preparation with PDBF
 ```bash
 conda env create -f environment_openfe.yml
 conda activate openfe_env
+# Validate installation
+python validate_environment.py openfe
 ```
 
 **Required for cells:** Cell 9 (marked with `#conda openfe env`)
@@ -37,6 +41,8 @@ Used for AutoDock-specific docking operations.
 ```bash
 conda env create -f environment_autodock.yml
 conda activate autodock
+# Validate installation
+python validate_environment.py autodock
 ```
 
 **Required for cells:** Cell 13 (marked with `#conda autodock env`)

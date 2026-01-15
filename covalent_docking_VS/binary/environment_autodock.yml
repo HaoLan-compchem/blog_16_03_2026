@@ -8,3 +8,5 @@ dependencies:
   - rdkit
   - numpy
   - autodock-vina
+  - jupyter
+  - ipykernel
