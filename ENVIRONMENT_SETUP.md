@@ -58,7 +58,7 @@ If you encounter issues with the environment setup:
 
 2. Try creating the environment with strict channel priority:
    ```bash
-   conda env create -f environment_vina.yml --channel-priority strict
+   conda env create -f environment_vina.yml --strict-channel-priority
    ```
 
 3. If a package is not available, try installing it separately with pip after activating the environment:
