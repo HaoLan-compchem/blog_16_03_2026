@@ -49,8 +49,7 @@ The <b>figure 2</b> is a KNIME workflow I used to process and merge the data of 
 As shown in the <b>figure 3</b>, my major concern is the overwhelming active set compared to insufficicent data with inactive labels. This is a common problem from public database where academic nerds prefer to publish and collect positive results of their research. Based on my experience so far in industry where investment is not a problem, things are completely different: <b>We always collect much more negative data than those positives from our colleagues/collaborators/CROs in the DMTA cycle...</b> Hence I do not think these limited and imbalanced dataset are suitable for ML-based QSAR modelling on any purpose. It is better to seek opportunity and breakthrough from other database even without any activity label.             
 </p>
 <img src="photos_and_videos/figure_3.png" alt="figure3" width="360px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 3</b>. The t-SNE plot showing imbalanced data distribution between active and inactive CRBN chemical sets that against the need for ML/QSAR analysis properly.</font>
-<br><br>
+<font size="2"><b>Figure 3</b>. The t-SNE plot showing imbalanced data distribution between active and inactive CRBN chemical sets that against the need for ML/QSAR analysis properly.</font><br>
 
 ### Commerical Database with Cheminformatics Analysis
 <p style="text-align: justify;">
@@ -86,7 +85,7 @@ Since the organic database is originally from commercial source, I also managed 
 <b>2. Before the covalent transformation, degenerate diverse structures into Murcko scaffolds for the simplicity as hit library</b> (downsized approximately from 4000 to 2500)<br>
 <b>3. After the covalent transformation, ensure imide substructure still exist but not undesired substructures</b> (using 'pains' list except phthalimide and reactive warheads' smarts)<br><br>
 <p style="text-align: justify;">
-By the way, I prompted AI agents <i>Gemini 3 Pro</i> and <i>Claude 4.x</i> using my <i>Copilot Pro</i> account for above tasks. Each individual rdkit function was coded almost perfectly I have to say, but these LLMs failed to have thoughtful consideration when no progressive direction (chatbox command instructions + markdown file protocols) is given by myself as a human cheminformatician to deal with such complex chemical database. The agent itself either forgot to clean protective fragments or just generate invalid/unmatched smarts variables against processing... It seems that we still need to develop chemistry-specialised language models and agents if people want to further unleash productivity.
+By the way, I prompted AI agents <i>Gemini 3 Pro</i> and <i>Claudex 4</i> using my <i>Copilot Pro</i> account for above tasks. Each individual rdkit function was coded almost perfectly I have to say, but these LLMs failed to have thoughtful consideration when no progressive direction (chatbox command instructions + markdown file protocols) is given by myself as a human cheminformatician to deal with such complex chemical database. The agent itself either forgot to clean protective fragments or just generate invalid/unmatched smarts variables against processing... It seems that we still need to develop chemistry-specialised language models and agents if people want to further unleash productivity.
 </p>
 <p style="text-align: justify;">
 Getting back to the topic, the cheminformatic workflow afforded the amount of 137673 potential covalent CRBN candidates (all MW below 600Da) where a subset of 19678 entries contain the Sulfonyl Fluoride or Fluorosulfate targeting histidine while others could be reactive with cysteine. <b>I think the chemical space become redundent now and it is the time to refine and enrich positives confidently using physics.</b>  
@@ -230,17 +229,262 @@ Following above VS screening results, both covalent and non-covalent CRBN binder
 
 ### Classification Task to Identify Covalent CRBN Ligand
 <p style="text-align: justify;">
-The chemical identification is a common task especially in toxicity study. Rather than determining whether a substance is hazard or not, herein it was applied to identify covalent CRBN candidate with ML approaches. Since I have annotated most common covalent warheads somehow in a previous step (check <b>Figure 7</b>), the purpose was to build a model that try to learn my experience as a chemist so it can classify such modality automatically.
+The chemical identification is a common task especially in toxicity study. Rather than determining whether a substance is hazard or not, here it was applied to identify covalent CRBN candidate with ML approaches. Since I have annotated most common covalent warheads somehow in a previous step (please check <b>Figure 7</b>), the purpose was to build a model that try to learn my experience as a chemist so such modality could be classified automatically.
 </p>
 <p style="text-align: justify;">
-<b>For practical ML in chemistry as indiviual researcher, a key point is to focus on the specific domain.</b> When the data was prepared as shown in <b>Figure 20</b>, I also tried to include some covalent modalities from other enamine library even though they are not in the CRBN chemical space at all. However I realised those noise (i.e., positive for covalency but negative for CRBN covalency) actually confuse the machine to learn effective patterns (e.g., embedded fingerprints or node/edge/graph matrix) that are responsible for the covalency in CRBN chemical space... Unless for transferred learning (in that case you also need to enrich the universe of non-crbn & non-covalent chemical space), it is better to build a small model straightforwardly which is suitable for specific task in the field as we normally do for each drug discovery project in industry.        
+<b>For practical ML in chemistry as indiviual researcher, a key point is to focus on the specific domain.</b> When the data was prepared as shown in <b>Figure 20</b>, I also tried to include some covalent modalities from other enamine library even though they are not from the CRBN chemical space at all. However I realised those noise (i.e., positive for covalency but negative for CRBN covalency) actually confuse the machine to learn effective patterns, either through embedded fingerprints or node/edge/graph-level matrix, that are responsible for the covalency in CRBN space... Unless for transferred learning (in that case one also need to enrich the universe of non-crbn & non-covalent space), it is better to build a small model straightforwardly that is suitable for specific task in the field of each drug discovery project.        
+</p>
 
 #### Classic Machine Learning with SVM and Tree Classifiers (RF and XGBoost)
+<p style="text-align: justify;">
+Based on my experience, some classic ML approaches could provide robust performance and generalisation on the QSAR classification task given the limited datasize of chemical space here below 10000. To start with, I tested support vector machine (SVM) based on a proper string of Morgan fingerprints (set size 8192 with radius 2 according to the occupancy screening in advance). The majority of on-bits come from the imide pharacophore as shown in <b>Figure 21</b>, which is not a concern for me since SVM could decide boundaries based on sparse but critical features in hyperplane.
+</p>
+<img src="photos_and_videos/figure_21.png" alt="figure21" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 21</b>. The most common structures of on-bit from CRBN chemical space embedding with Morgan fingerprints (size 8192 with radius 2).</font>
+<br><br>
+<p style="text-align: justify;">
+To ensure the generalisation capability of ML model, different Murcko scaffolds were distributed into training (80%) and testing (20%) sets. After the grid search of hyperparameters in scikit-learn (e.g., cost, gamma and kernal for SVM classifier) based on cross-validation within training set, the model performed so well that the prediction on testset almost reach 1.0 accuracy as well as 1.0 MCC (Matthews correlation coefficient - a statistical index balancing both precision and recall qualities in binary classification). To double check reasoning (one advantage of most classic ML models), I plotted the importance of top 25 fingerprint features in SVM (<b>Figure 22 top</b>). The interpretation is clear - the model did learn and make decisions from those most likely warheads including bits which are relevent to Sulfonyl Fluorides and Acrylamides.
+</p>
+<p style="text-align: justify;">
+Two common tree models, Random Forest (RF) and extreme gradient boosting (XGBoost), were tried next. Following similar CV grid search (max branch depth, number of estimators, sub-sample/features etc.) for model training and tuning, all testing performaces are perfect as expected. The XGBoost model demonstrated most steady classification and reasonable interpretation after several runs, where more weights/bias were built on Cyanamide-relevent bits in complex decision trees (<b>Figure 22 down</b>).
+</p>
+<img src="photos_and_videos/figure_22.png" alt="figure22" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 22</b>. The top-feature importance plot based on Morgan fingerprints respectively for tuned SVM, RF and XGBoost models, to classify the covalent modality from others in CRBN chemical space.</font>
+<br><br>
+<p style="text-align: justify;">
+Noteworthy, tuning the hyperparameter with grid search is a time-consuming step to establish a model properly in days. With the help from Claude, Bayesian optimisation using optuna module was coded and tried to search for a best set of hyperparameters (<b>Test 23</b>). Under 100 iterations in just few hours, the algorithm found a XGBoost model which is competible to classify all testset correctly based on similar feature importances. This reminded me with MCMC (Markov Chain Monte Carlo - also a type of Bayesian/Gaussian process if I am correct) for searching low-energy molecular conformations efficiently as I mentioned in the previous blog. <b>To find global optimum/minimum in a distribution or an energy landscape for example, we might not always need all trials based on <i>ab initio</i> physics. The sufficient high-quality data, empirical paradigms (e.g., DFT, force-field potential or even just model architecture) and approperate statistical methods together could lead us to the ground truth faster despite the approximation in anyway (i.e., the ideology of engineering).</b> This is my simple understanding so far in data science as physical chemist doing interdisciplinary studies...                      
+</p>
 
-#### Deep Learning with Graph Neural Networks (GCN, GAN and GIN)
+```python
+#Tuning hyperparameters of XGBoost using Optuna based on Bayesian optimization
+import optuna
 
-### Regression Task on HOMO-LUMO gap for Electrophilicity
+def objective(trial):
+    # 1. Define the search space
+    param = {
+        'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+        'max_depth': trial.suggest_int('max_depth', 2, 10),
+        'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.2, log=True),
+        'subsample': trial.suggest_float('subsample', 0.5, 1.0),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
+        'gamma': trial.suggest_float('gamma', 0, 1.0),
+    }
+    # 2. Initialize model with suggested params
+    model = XGBClassifier(**param, random_state=42, eval_metric='logloss')
+    
+    # 3. Use train data to get a score (using MCC as our metric)
+    score = cross_val_score(model, 
+                            X_train,
+                            y_train,
+                            cv=5,
+                            scoring='matthews_corrcoef').mean()
+    
+    return score
 
-#### QM calculations
+# 4. Create a "study" and optimize
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=100)
+print(f"Best Params: {study.best_params}")
+
+#Testing best XGBoost from Optuna
+best_xgb_optuna = XGBClassifier(**study.best_params,
+                                random_state=42,
+                                eval_metric='logloss')
+best_xgb_optuna.fit(X_train, y_train)
+y_pred = best_xgb_optuna.predict(X_test)
+acc_optuna = accuracy_score(y_test, y_pred)
+mcc_optuna = matthews_corrcoef(y_test, y_pred)
+print(f"Optimised XGBoost - Test MCC: {mcc_optuna:.4f} | Test ACC: {acc_optuna:.4f}")
+```
+<font size="2"><b>Text 23.</b> The Python code to tune hyperparameters of XGBoost classifier with Bayesian optimisation.</font><br>
+
+#### Classification by Deep Learning with Graph Neural Networks (GCN, GAT and GIN)
+<p style="text-align: justify;">
+The classification model was also built with graph neural network. Following some tutorials from DeepChem, TeachOpenCADD and blogger MaximeLabonne as well as advise from AI agent, each CRBN molecule in my dataset was embeded into graph data at first. For example with Thalidomide (<b>Figure 24</b>), the adjacent matrix was created to show bonding connectivities (edge) among all atoms (node) - a simplied version of graph. In DeepChem modules, I found its graph featuriser convert the chemical structure into 3 sub-matrices: <b>node features, edge index and edge features</b>. The first and second matrix are compulsory to construct a graph while the edge features (e.g., bond types) might be redundent since node features already contain such information implicitly. Moreover, the massage passing algorithm and mean/max/sum aggregate for pooling update in most classic GNN architectures are not very sensitive to edge type as far as I have learnt from LLMs, and we are not predicting chemical properties that are closely associated with bond. Hence, the matrix of edge features was dropped for simplicity as suggested by workshop.                  
+</p>
+<img src="photos_and_videos/figure_24.png" alt="figure24" width="480px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 24</b>. The adjacent matrix of Thalidomide as a simply encoded graph in 2D, and the actual object featurised by DeepChem module for this study.</font>
+<br><br>
+<p style="text-align: justify;">
+To be honest, deep learning (DL) is seldom used for my daily QSAR work as computational chemist in industry, neither am I software engineer nor mathematician by professional training. There was no knowledge of Linear Algrebra or Matrix Transformation in my mind. During the xmas holiday before I wrote this blog, I took a plenty of time to get familiar with PyTorch and modularise each DL step in the workflow below based on my coding experience and AI proficiency:
+<br><br>
+<b>1. Graph Featurisation, Collate, Scaffold-based Splitting and Dataloader Preparation</b><br>
+<b>2. Epoch Training with backward propagation together with Adam Optimisation on BCE loss function</b><br>
+<b>3. Some Regularisations to avoid over-fitting as well as The Evaluation using MCC for binary classification</b><br> 
+<b>4. Tunning Hyperparameters - batch size, learning rate and hidden dimensions in each GNN architecture</b><br>
+see the notebook of pytorch_GNN_classification.ipynb for more details...
+</p>
+<p style="text-align: justify;">
+For the forward architecture, I tried Graph Convolutional Network (GCN), Graph Isomorphism Network (GIN) as well as Graph Attention Network (GAT). Both GCN and GIN were inspired from TeachOpenCADD tutorial while GAT was proposed by my Gemini agent (<b>Text 25</b>). There might be inappropriate layers and readout functions from the perspective of data science, however a recent research from cheminformaticians in GSK suggested: <b>The GNN architecture is less important than hyperparamter optimisation and feature engineering for QSAR study</b> (DOIs in reference). With the deepchem graph featurised from rdkit canonical smiles string (stereo-ignored), I decided to focus on tuning hyperparameters in order to maximise GNN performances on the classification of covalent CRBN ligand modalities. 
+</p>
+
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as Fun
+from torch.nn import Linear, Sequential, BatchNorm1d, ReLU
+from torch_geometric.nn import GCNConv, GINConv, GATConv, global_mean_pool, global_add_pool
+
+# Set device to GPU RTX5070 in Hao's laptop
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Common hyperparameters to be tuned later
+HIDDEN_DIM = 32
+BATCH_SIZE = 64
+LEARNING_RATE = 0.001
+EPOCHS = 100
+EARLY_STOP_PATIENCE = 5
+# Some regularisation parameters to prevent overfitting issue given limited crbn data < 10000
+DROPOUT_P = 0.5
+WEIGHT_DECAY = 1e-4
+# Initial random seed which will be varied 2 more times (21, 0) for robustness testing
+RANDOM_SEED = 42
+
+# Define GNN architectures: GCN, GIN, and GAT
+class GCN(torch.nn.Module):
+    def __init__(self, in_features, dim_h):
+        super().__init__()
+        # GCNConv layers for graph convolutional operations
+        self.conv1 = GCNConv(in_features, dim_h)
+        self.conv2 = GCNConv(dim_h, dim_h)
+        self.conv3 = GCNConv(dim_h, dim_h)
+        self.lin = torch.nn.Linear(dim_h, 1)
+    def forward(self, graphs_in):
+        # Normalize input to a list of graph objects
+        graphs_list = list(graphs_in)
+        x_list = []
+        edge_list = []
+        batch = []
+        node_offset = 0
+        # Build concatenated Tensors (x, edge_index, batch vector)
+        for i, g in enumerate(graphs_list):
+            # Convert node features and edge index to 2 tensors and move them to device (GPU/CUDA)
+            nf = torch.tensor(g.node_features, dtype=torch.float32).to(device)
+            ei = torch.tensor(g.edge_index, dtype=torch.long).to(device)            
+            # Shift edge indices by the current node offset
+            edge_list.append(ei + node_offset)
+            x_list.append(nf)
+            # Create batch vector for this graph (all nodes get the same graph index)
+            n_nodes = nf.shape[0]
+            batch.append(torch.full((n_nodes,), i, dtype=torch.long, device=device))
+            node_offset += n_nodes
+        # Concatenate all features, edges, and batch vectors
+        x = torch.cat(x_list, dim=0)
+        e = torch.cat(edge_list, dim=1)
+        batch = torch.cat(batch, dim=0)
+        # GCN layers with ReLU activations
+        x = self.conv1(x, e)
+        x = x.relu()
+        x = self.conv2(x, e)
+        x = x.relu()
+        x = self.conv3(x, e)
+        # Global Pooling with mean aggregation for GCN graph-level prediction
+        x = global_mean_pool(x, batch)
+        # Readout layer
+        x = Fun.dropout(x, p=DROPOUT_P, training=self.training)
+        x = self.lin(x) # Output logits (unscaled)
+        return x.squeeze(-1) # Squeeze to shape [batch_size]    
+
+class GIN(torch.nn.Module):
+    def __init__(self, in_features, dim_h):
+        super(GIN, self).__init__()
+        # Add BatchNorm for GIN stability
+        self.conv1 = GINConv(
+            Sequential(Linear(in_features, dim_h), BatchNorm1d(dim_h), ReLU(), 
+                      Linear(dim_h, dim_h), BatchNorm1d(dim_h), ReLU())
+        )
+        self.conv2 = GINConv(
+            Sequential(Linear(dim_h, dim_h), BatchNorm1d(dim_h), ReLU(), 
+                      Linear(dim_h, dim_h), BatchNorm1d(dim_h), ReLU())
+        )
+        self.conv3 = GINConv(
+            Sequential(Linear(dim_h, dim_h), BatchNorm1d(dim_h), ReLU(), 
+                      Linear(dim_h, dim_h), BatchNorm1d(dim_h), ReLU())
+        )
+        self.lin = Linear(dim_h, 1)
+    def forward(self, graphs_in):
+        graphs_list = list(graphs_in)
+        x_list = []
+        edge_list = []
+        batch = []
+        node_offset = 0
+        for i, g in enumerate(graphs_list):
+            nf = torch.tensor(g.node_features, dtype=torch.float32).to(device)
+            ei = torch.tensor(g.edge_index, dtype=torch.long).to(device)
+            edge_list.append(ei + node_offset)
+            x_list.append(nf)
+            n_nodes = nf.shape[0]
+            batch.append(torch.full((n_nodes,), i, dtype=torch.long, device=device))
+            node_offset += n_nodes
+        x = torch.cat(x_list, dim=0)
+        e = torch.cat(edge_list, dim=1)
+        batch = torch.cat(batch, dim=0)
+        # GIN layers with MLPs and BatchNorm
+        x = self.conv1(x, e)
+        x = self.conv2(x, e)
+        x = self.conv3(x, e)
+        # Global Pooling with sum aggregation for GIN graph-level prediction
+        x = global_add_pool(x, batch)
+        x = Fun.dropout(x, p=DROPOUT_P, training=self.training)
+        x = self.lin(x)
+        return x.squeeze(-1)  
+
+class GAT(torch.nn.Module):
+    def __init__(self, in_features, dim_h, heads=3):
+        super(GAT, self).__init__()
+        # GATConv layers for graph attention operations
+        self.conv1 = GATConv(in_features, dim_h, heads=heads, concat=True)
+        self.conv2 = GATConv(dim_h * heads, dim_h, heads=heads, concat=True)
+        self.conv3 = GATConv(dim_h * heads, dim_h, heads=1, concat=False)
+        self.lin = Linear(dim_h, 1)
+    def forward(self, graphs_in):
+        graphs_list = list(graphs_in)
+        x_list = []
+        edge_list = []
+        batch = []
+        node_offset = 0
+        for i, g in enumerate(graphs_list):
+            nf = torch.tensor(g.node_features, dtype=torch.float32).to(device)
+            ei = torch.tensor(g.edge_index, dtype=torch.long).to(device)
+            edge_list.append(ei + node_offset)
+            x_list.append(nf)
+            n_nodes = nf.shape[0]
+            batch.append(torch.full((n_nodes,), i, dtype=torch.long, device=device))
+            node_offset += n_nodes
+        x = torch.cat(x_list, dim=0)
+        e = torch.cat(edge_list, dim=1)
+        batch = torch.cat(batch, dim=0)
+        # GAT layers with attention mechanism
+        x = self.conv1(x, e)
+        x = x.relu()
+        x = self.conv2(x, e)
+        x = x.relu()
+        x = self.conv3(x, e)
+        # Global Pooling with mean aggregation for GAT graph-level prediction
+        x = global_mean_pool(x, batch)
+        x = Fun.dropout(x, p=DROPOUT_P, training=self.training) 
+        x = self.lin(x)
+        return x.squeeze(-1)
+```
+<font size="2"><b>Text 25.</b> The Python code for 3 common GNN architectures in PyTorch used for chemical classification based on DeepChem GraphData.</font><br>
+<p style="text-align: justify;">
+Following the grid search (<b>Figure 26</b>), all GNN models are able to identify those covalent molecules in CRBN chemical space with perfect precision, recall and accuarcy (> 0.95). Compared to GCN and GAT, the GIN model demonstrated most robust mcc stabilities regardless of hyperparameters. Similarly with Bayesian optimisation, a well-tuned graph model (GIN with hidden_dim=16, batch_size=256 and learning_rate=0.001) was rapidly obtained for nearly all correct classifications (mcc up to 0.98). <b>It seems that both classic ML and GNN approaches are able to deal with the chemical classification task in this study... Then how about regression modelling?</b>
+</p>
+<img src="photos_and_videos/figure_26.png" alt="figure26" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 26</b>. The hyperparameter screening result for all graph models trained to make binary classification between covalent and non-covalent CRBN binders.</font><br>
+
+### Regression Task on HOMO-LUMO Gap for Electrophilicity
+<p style="text-align: justify;">
+In covalent drug discovery, the estimation of reactivity is a common task for medicinal chemists. With complex biophysical assays, we are able to measure indicators like Kd/ki for binding kinetics in covalent mechanism. Alternatively, the glutathione (GSH) reactivity assay could provide high throughput screening on chemicals targeting a cysteine residue in approximation. For computational chemistry, the reactivity might be even roughly evaluated by molecular electrophilicity from calculating HOMO, LUMO energies and their gaps based on QM approach. Since I have annotated classes of covalent and non-covalent compounds in CRBN chemical space empirically, it would be meaningful to check if such label could be characterised and quantified through numerical numbers based on the scientific computation.                   
+</p>
+
+#### Quantum Chemical Calculations
+<p style="text-align: justify;">
+To calculate molecualr electronic properties reliably within the CRBN chemical space, I instructed my agent for a workflow starting from ETKDG conformational sampling, semi-empirical xTB optimisations to single-point energy calculations with UMA as well as Boltzmann averaging on ensembles in vaccum (<b>Figure 27</b>). This is a compromised approach to screen over 10000 hit candidates, considering slow computation speed with MD simulations and DFT calculations but acceptable accuracy with MLFF energies and xTB properties based on my previous experience.  
+</p>
+<img src="photos_and_videos/figure_27.png" alt="figure27" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 27</b>. The example to calculate eletrophilic properties (conformationally dependent) for two CRBN ligand modalities respectively based on a quick and dirty statistical/quantum mechanical workflow.</font><br>
+
+
 
 #### Model Benchmark
