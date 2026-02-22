@@ -306,7 +306,7 @@ The classification model was also built with graph neural network. Following som
 <font size="2"><b>Figure 24</b>. The adjacent matrix of Thalidomide as a simply encoded graph in 2D, and the actual object featurised by DeepChem module for this study.</font>
 <br><br>
 <p style="text-align: justify;">
-To be honest, deep learning (DL) is seldom used for my daily QSAR work as computational chemist in industry, neither am I software engineer nor mathematician by professional training. There was no knowledge of Linear Algrebra or Matrix Transformation in my mind. During the xmas holiday before I wrote this blog, I took a plenty of time to get familiar with PyTorch and modularise each DL step in the workflow below based on my coding experience and AI proficiency:
+To be honest, deep learning (DL) is seldom used for my daily QSAR work as computational chemist in biotech, neither am I software engineer nor mathematician by professional training. There was no knowledge of Linear Algrebra or Matrix Transformation in my mind. During the xmas holiday before I wrote this blog, I took a certain amount of time to get familiar with PyTorch and modularise each DL step in the workflow below based on my coding experience and AI proficiency:
 <br><br>
 <b>1. Graph Featurisation, Collate, Scaffold-based Splitting and Dataloader Preparation</b><br>
 <b>2. Epoch Training with backward propagation together with Adam Optimisation on BCE loss function</b><br>
@@ -315,7 +315,7 @@ To be honest, deep learning (DL) is seldom used for my daily QSAR work as comput
 see the notebook of pytorch_GNN_classification.ipynb for more details...
 </p>
 <p style="text-align: justify;">
-For the forward architecture, I tried Graph Convolutional Network (GCN), Graph Isomorphism Network (GIN) as well as Graph Attention Network (GAT). Both GCN and GIN were inspired from TeachOpenCADD tutorial while GAT was proposed by my Gemini agent (<b>Text 25</b>). There might be inappropriate layers and readout functions from the perspective of data science, however a recent research from cheminformaticians in GSK suggested: <b>The GNN architecture is less important than hyperparamter optimisation and feature engineering for QSAR study</b> (DOIs in reference). With the deepchem graph featurised from rdkit canonical smiles string (stereo-ignored), I decided to focus on tuning hyperparameters in order to maximise GNN performances on the classification of covalent CRBN ligand modalities. 
+For the forward architecture, I tried Graph Convolutional Network (GCN), Graph Isomorphism Network (GIN) as well as Graph Attention Network (GAT). Both GCN and GIN were inspired from TeachOpenCADD tutorial while GAT was proposed by my Gemini agent (<b>Text 25</b>). There might be inappropriate layers and readout functions from professional perspective of data science, however a recent research from cheminformaticians in GSK suggested: <b>The GNN architecture is less important than hyperparamter optimisation and feature engineering for QSAR study</b> (DOIs in reference). With the deepchem graph featurised from rdkit canonical smiles string (stereo-ignored), I decided to focus on tuning hyperparameters in order to maximise GNN performances on the classification of covalent CRBN ligand modalities. 
 </p>
 
 ```python
@@ -473,18 +473,28 @@ Following the grid search (<b>Figure 26</b>), all GNN models are able to identif
 <img src="photos_and_videos/figure_26.png" alt="figure26" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 26</b>. The hyperparameter screening result for all graph models trained to make binary classification between covalent and non-covalent CRBN binders.</font><br>
 
-### Regression Task on HOMO-LUMO Gap for Electrophilicity
+### Regression Task on Electrophilicity
 <p style="text-align: justify;">
-In covalent drug discovery, the estimation of reactivity is a common task for medicinal chemists. With complex biophysical assays, we are able to measure indicators like Kd/ki for binding kinetics in covalent mechanism. Alternatively, the glutathione (GSH) reactivity assay could provide high throughput screening on chemicals targeting a cysteine residue in approximation. For computational chemistry, the reactivity might be even roughly evaluated by molecular electrophilicity from calculating HOMO, LUMO energies and their gaps based on QM approach. Since I have annotated classes of covalent and non-covalent compounds in CRBN chemical space empirically, it would be meaningful to check if such label could be characterised and quantified through numerical numbers based on the scientific computation.                   
+In covalent drug discovery, the estimation of reactivity is a common task for medicinal chemists. With complex biophysical assays, we are able to measure indicators like Kd/ki for binding kinetics in covalent mechanism. Alternatively, the glutathione (GSH) reactivity assay could provide high throughput screening on chemicals targeting a cysteine residue in approximation. For computational chemistry, the reactivity might be even evaluated roughly from ligand electrophilicity through calculating HOMO, LUMO energies and their gaps based on QM approach. Since I have annotated classes of covalent and non-covalent compounds in CRBN chemical space empirically, it would be sensible to check if such label could be characterised and quantified through numerical numbers based on the scientific computation.                   
 </p>
 
 #### Quantum Chemical Calculations
 <p style="text-align: justify;">
-To calculate molecualr electronic properties reliably within the CRBN chemical space, I instructed my agent for a workflow starting from ETKDG conformational sampling, semi-empirical xTB optimisations to single-point energy calculations with UMA as well as Boltzmann averaging on ensembles in vaccum (<b>Figure 27</b>). This is a compromised approach to screen over 10000 hit candidates, considering slow computation speed with MD simulations and DFT calculations but acceptable accuracy with MLFF energies and xTB properties based on my previous experience.  
+To calculate molecualr electronic properties reliably within the CRBN chemical space, I instructed my agent for a workflow starting from ETKDG(MMFF) conformational search, xTB geometry optimisations to single-point energy calculations with UMA model as well as Boltzmann averaging on ensembles in vaccum (<b>Figure 27</b>). This is a compromised approach to screen over 10000 hit candidates, considering slow computation speed with MD simulations and DFT calculations but acceptable accuracy with atomic NNP energies and semi-empirical xTB properties based on my previous experience.  
 </p>
 <img src="photos_and_videos/figure_27.png" alt="figure27" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 27</b>. The example to calculate eletrophilic properties (conformationally dependent) for two CRBN ligand modalities respectively based on a quick and dirty statistical/quantum mechanical workflow.</font><br>
+<font size="2"><b>Figure 27</b>. The example to calculate eletrophilic properties (conformationally dependent) for 2 distinct CRBN ligand modalities respectively based on a quick & dirty statistical quantum mechanical workflow.</font>
+<br><br>
+<p style="text-align: justify;">
+Comparing HOMO, LUMO and gap energies between the covalent and the non-covalent class of my CRBN chemical space (<b>Figure 28</b>), some statistically significant differences (p < 0.05 in MWU and t-test) could be observed: All covalent species tend to have lower LUMO, higher HOMO and smaller gap values than others. The distribution of xTB-based electrophilicity index is also more significant for the covalent class. 
+</p>
+<img src="photos_and_videos/figure_28.png" alt="figure28" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 28</b>. The distribution of HOMO, LUMO, gap energies and electrophilicty index (&omega;) in covalent and non-covalent classes of CRBN chemical space.</font><br>
 
+$$\omega = \frac{(E_{H} + E_{L})^2}{4(E_{L} - E_{H})}$$
 
+<p style="text-align: justify;">
+Nevertheless, these molecular-level QM features are insufficient to classify the covalency confidently in desired chemical space. This was also confirmed by researches from Bayer and Boehringer Ingelheim (DOIs in reference). We might need some further physical calculations associated with the warhead fragment (e.g., atom attribute of Fukui indices in FMO, reaction activation energy with nucleophilic residue etc.) in order to convince ourself of actual covalency for CRBN-based binder or degrader... Given that LUMO value is more relevant to electrophilicity (i.e., the orbital which accept electrons) and its distribution approach Gaussian in our chemical space (<b>Figure 28 second</b>), I decided to test some regression models on it.               
+</p>
 
-#### Model Benchmark
+#### Benchmarking Models for LUMO Prediction
