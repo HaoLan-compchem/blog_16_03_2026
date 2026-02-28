@@ -12,111 +12,159 @@ tags:
 
 ## Introduction
 <p style="text-align: justify;">
-In 2025, I have written 2 posts about molecular modelling with AI co-folding and physical simulation approaches for SBDD based on my background in physical organic chemistry and biophysics. However, there are several other important aspects of modern computational chemistry for drug discovery, including <b>cheminformatics</b> and <b>machine learning</b>, which have not been touched in my blog yet. During these years in industry, those fields are actually where I have learnt and progressed most deeply and rapidly. In this blog, I would like to share some experience in my journey adapt to multiple positions as both cheminformatician and machine learning engineer in the biotech environment. To demonstrate how data science is applied to the real-world drug discovery, <b>a virtual screening (VS) example of covalent drug discovery in the popular Cereblon (CRBN) chemical space would be presented in this post (Figure 1)</b>. I would go through a deliberate workflow starting from chemical database search to idea enumuration, docking test as well as QSAR study and AI generation under rational supervisions from the perspective of organic and medicinal chemistry.   
+In 2025, I published two posts exploring molecular modeling through AI co-folding and physics-based simulations for Structure-Based Drug Discovery (SBDD), drawing on my background in physical organic chemistry and biophysics. However, some pillars of modern computational drug discovery - <b>cheminformatics</b> and <b>machine learning (ML)</b> - have yet to be discussed here. During my time in the industry, these are the fields where I have experienced the most significant professional growth.
+</p>
+<p style="text-align: justify;">
+In this post, I will share insights from my journey transitioning between the roles of a cheminformatician and an ML engineer within the biotech ecosystem. To demonstrate the real-world application of data science in drug discovery, I will present <b>a virtual screening (VS) workflow targeting the Cereblon (CRBN) chemical space for covalent drug discovery (Figure 1).</b> We will walk through a rigorous pipeline: from chemical database mining and library enumeration to molecular docking, QSAR modelling, and AI-driven generation - all guided by the rational constraints of organic and medicinal chemistry.  
 </p>
 <img src="photos_and_videos/figure_1.png" alt="figure1" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/><br>
-<font size="2"><b>Figure 1</b>. The co-crystal structures of CRBN in complex with IMiD glue ligands (left - binary from PDB 4TZ4) and 2 targeted proteins to be degraded (mid - <b>IKZF</b> from PDB 7U8F; right - <b>WIZ</b> from PDB 8TZX), with opportunities in developing covalent drugs.</font><br>
+<font size="2"><b>Figure 1.</b> Co-crystal structures of CRBN in complex with IMiD molecular glues. <b>Left:</b> Binary complex (PDB 4TZ4). <b>Center/Right:</b> Ternary complexes with neosubstrates <b>IKZF2</b> (PDB 7U8F) and <b>WIZ</b> (PDB 8TZX), highlighting the structural basis for covalent ligand design with potential warheads.</font><br>
 
 ## Study Outlines
 
-1. <b>Data Inspection</b> - Check the chemical space of CRBN-based binder/degrader with commerical and open-source database.
+1. <b>Data Inspection & Curation</b> - Analysing the chemical space of CRBN-based binders and degraders using both open-source and commercial databases.
 
-2. <b>Chemical Enrichment</b> - Use traditonal cheminformatics and QM approach to generate synthetic data in the domain of insufficient chemical space.
+2. <b>Chemical Library Enrichment</b> - Utilising traditional cheminformatics and Quantum Mechanics (QM) approaches to generate synthetic data, specifically addressing regions of insufficient chemical space coverage.
 
-3. <b>Physical Validation</b> - Apply shape-constrained molecular docking for the virtial screening of large cheminformatic library, to refine the chemical space more realistically.
+3. <b>Physical Validation via VS</b> - Implementing shape-constrained molecular docking to screen large-scale chemical libraries, refining the candidate space based on realistic binding poses and steric complementarity.
 
-4. <b>QSAR Modelling</b> - Build classic ML and graph-based deep learning models to classify and identify the prior chemical space of interest (i.e., covalent modulator based on CRBN)
+4. <b>QSAR Modelling & Hit Identification</b> - Developing classical ML (e.g., SVM, tree models) and Graph Neural Networks (GNNs) to classify, regress and prioritise chemical spaces of interest (specifically CRBN-based covalent modulators).
 
-5. <b>Generative AI</b> - Test mature chemical generation models (including smilesRNN module from MorganCThomas/Nxera team and the latest RL-based Reinvent4 platform developped by AZ) for exploring the desired chemical space as well as necessary post-processing including alerts filtration, drug-like rewarding and selection with transferred QSAR model.
+5. <b>Generative AI & Rational Optimisation</b> - Evaluating industry-standard generative models, including the smilesRNN module from the MorganCThomas/Nxera team and the REINVENT4 Reinforcement Learning (RL) platform developed by AstraZeneca, together with post-processing by alert filtering, descriptor scoring, and transferred QSAR models for the final selection.
 
 ## Chemical Database Search and Processing
 <p style="text-align: justify;">
-There are a lot of chemical database in the public domain, including <i>PubChem, ChEMBL, ZINC, Enamine</i> etc. They are suitable for different purposes and cheminformaticians usually have different preference in choosing those open resources. As a computational medicinal chemist closely supporting pipeline projects all day every day in the TPD field, I found <i>bindingDB</i> and <i>molecularglueDB</i> are useful in covering general dataset published from academia. For people working in the industry, we also quite value those latest data which are less disclosed in the patent especially from our competitors. These documented data often requires extra efforts to extract, annotate and structuralise (thankfully now we have several AI tools such as <i>DECIMER</i> which is used later in this post). Meanwhile, efficient drug design usually needs specific dataset based on synthetically feasible building blocks, and chemical supplier such as <i>Enamine</i> could provide corresponding catagorties to match our critira depending on the task.
+The public domain offers a vast array of chemical databases — including <b>PubChem</b>, <b>ChEMBL</b>, <b>ZINC</b>, and <b>Enamine</b> — each serving distinct research purposes. As a computational medicinal chemist supporting Targeted Protein Degradation (TPD) pipelines actively, I have found <b>BindingDB</b> and <b>MolecularGlueDB</b> particularly effective for capturing academic datasets.
 </p>
 <p style="text-align: justify;">
-Those are the database I found very valuable in my daily work but the approach to engineer and utilise them could be even more critical if we want to maximise their benefits. To process data professionally in cheminformatics, I prefer to use KNIME pipeline which is a powerful GUI toolkit developped from JavaScript in manipulating and visualising tubular data (as in csv file) in sequential steps. It has also saved me tons of time from foundamental data engnieering by Python coding with rdkit, pandas and numpy... and I am not yet confident with fully automatic LLM/AI agents nowadays for such processing tasks which would require intensive human expertise in chemistry as well as instant monitoring/debugging capabilities.                          
+In an industrial setting, we also place a high premium on the latest competitive intelligence, often found in patent literature. Extracting, annotating, and structuralising this "dark data" requires significant effort... Fortunately, AI-powered tools like <b>DECIMER</b> (used later in this workflow) have streamlined the translation of chemical images into machine-readable formats. Furthermore, efficient drug design necessitates libraries built upon synthetically feasible building blocks. Suppliers like Enamine provide categorised catalogs that allow us to tailor our search criteria to the specific synthetic constraints of a project.
+</p>
+<p style="text-align: justify;">
+While sourcing data is foundational, the engineering approach used to process it is often the differentiator in a project's success. For professional cheminformatics workflows, I prefer <b>KNIME</b> as learnt during the work. This GUI-based platform is exceptionally powerful for manipulating and visualising tabular data (such as CSV or SD files) through sequential nodes. Honestly KNIME has saved me countless hours typically spent on boilerplate data engineering with Python (using RDKit, Pandas, and NumPy modules). While LLM-driven AI agents are evolving, I remain cautious about fully delegating these tasks to them. I believe data processing in chemistry still requires deep domain expertise and the ability to perform real-time monitoring and debugging to ensure structural integrity.
 </p>
 
-### Open-source Database with Activity Labels and Potential Issues
+### Open-Source Curation and Data Imbalance
 <p style="text-align: justify;">
-The <b>figure 2</b> is a KNIME workflow I used to process and merge the data of CRBN chemical space loaded from <i>bindingDB</i> and <i>molecularglueDB</i> respectively. Apart from building the final dataset in sdf format, I also checked all available PDB structure information (for later steps) and inspect the distribution of chemical space through plotting t-distributed Stochastic Neighbour Embedding (t-SNE) - a dimensionality reduction technique to simplify chemical space based on molecular fingerprints and <i>Tanimoto</i> similarity. Since most PROTACs with high molecular weight had been removed and remaining CRBN binders/glues were small molecules and they comprise a dataset with only few hundreds of record, I set the default 1024 Morgan bits (stereo-ignored) based on 2 radius of atom neigbour without worrying about the issue of bits clash. Notably, the most time-consuming step is to classify active/inactive sets from diverse resources, cellular/biophysical assays and detailed conditions etc., which I have to divide and test these labels manually and cautiously.
+<b>Figure 2</b> illustrates the KNIME workflow I developed to aggregate and process CRBN chemical space data from BindingDB and MolecularGlueDB. Beyond generating the final dataset in SDF format, the pipeline extracts available PDB structural metadata for downstream structural analysis. To assess the chemical diversity, I employed <b>t-distributed Stochastic Neighbor Embedding (t-SNE)</b>, a dimensionality reduction technique used here to project the chemical space based on molecular fingerprints and <b>Tanimoto similarity</b>.
 </p>
-<img src="photos_and_videos/figure_2.png" alt="figure2" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<img src="photos_and_videos/figure_2.png" alt="figure2" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 2</b>. The KNIME pipeline to integrate two chemical database, check specific labelled information and visualise the chemical space on t-SNE plot.</font>
 <br><br>
-
 <p style="text-align: justify;">
-As shown in the <b>figure 3</b>, my major concern is the overwhelming active set compared to insufficicent data with inactive labels. This is a common problem from public database where academic nerds prefer to publish and collect positive results of their research. Based on my experience so far in industry where investment is not a problem, things are completely different: <b>We always collect much more negative data than those positives from our colleagues/collaborators/CROs in the DMTA cycle...</b> Hence I do not think these limited and imbalanced dataset are suitable for ML-based QSAR modelling on any purpose. It is better to seek opportunity and breakthrough from other database even without any activity label.             
+Since high-molecular-weight PROTACs were filtered out, the remaining dataset consists of a few hundred small-molecule CRBN binders and glues. Given this relatively small scale, I utilised 1024-bit <b>Morgan fingerprints</b> (radius = 2, chirality ignored) without significant concern for bit collisions. The most labor-intensive phase, however, remains the manual classification of "active" versus "inactive" sets. This requires a detailed review of diverse data sources, varying biophysical or cellular assay conditions, and thresholding — all of which demand cautious, expert-led curation. As shown in <b>Figure 3</b>, a major challenge emerged: an overwhelming prevalence of "active" compounds relative to "inactive" labels. This reflects a pervasive <b>publication bias</b> in open databases, where academic research naturally prioritises and reports successful positive results.
 </p>
-<img src="photos_and_videos/figure_3.png" alt="figure3" width="360px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 3</b>. The t-SNE plot showing imbalanced data distribution between active and inactive CRBN chemical sets that against the need for ML/QSAR analysis properly.</font><br>
-
-### Commerical Database with Cheminformatics Analysis
+<img src="photos_and_videos/figure_3.png" alt="figure3" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 3</b>. The t-SNE plot showing imbalanced data distribution between active and inactive CRBN chemical sets that against the need for ML/QSAR analysis properly.</font>
+<br><br>
 <p style="text-align: justify;">
-There are some libraries of CRBN-focused molecular glues recently released by <i>Enamine</i> and I found they are quite informative and diverse containing scaffolds from <b>classic IMiDs</b> to those latest Phenyl Amino Glutarimide (<b>PAG</b>), Phenyl Dihydrouracil (<b>PD</b>), Phenyl Glutarimide (<b>PG</b>), Acylated Amino Glutarimide (<b>AAG</b>), avadomide and so on. Using KNIME workflow (<b>Figure 4a</b>), I analysed the overall chemical space at different levels. The molecular level is the most obvious representation (over 3000 canonical smiles string uniquely after stripping stereo tokens like '@' for simplicity) and most molecules contain <b> at least 1 imide substructure in ring as the necessary pharamacophore (Figure 4b)</b>. However such comprehensive t-SNE plot looks a bit fuzzy with too many similar or even duplicate scaffolds concentrated together (alternative plotting with UMAP did not help either). For sparse and clustered visualisation, I degenerated the level represented with Murcko scaffolds (basically it only includes the union of ring systems and linkers in a molecule) as well as decomposed MCS (maximum common substructure) cores. Following this focused map, most classes of core scaffold were found belong to IMiDs but the merged dataset still contain some latest scaffolds like PAG/PG as shown in core 10 or 21 for example.
+In an industrial setting, the situation is usually opposed. In the <b>Design-Make-Test-Analyze (DMTA)</b> cycle, we typically generate far more negative data than positive hits. Relying solely on these limited and imbalanced public datasets for QSAR modeling is often not productive. To build a robust predictive model, we must look beyond these biased activity labels and seek opportunities in broader, unlabelled chemical libraries or through data augmentation.
+</p>
+
+### Commercial Database & Cheminformatics Analysis 
+<p style="text-align: justify;">
+Recently, Enamine released several targeted libraries focused on CRBN molecular glues. These datasets are highly informative and chemically diverse, spanning a range of scaffolds from <b>classic IMiDs</b> to newer derivatives such as Phenyl Amino Glutarimides (<b>PAG</b>), Phenyl Dihydrouracils (<b>PD</b>), Phenyl Glutarimides (<b>PG</b>), Acylated Amino Glutarimides (<b>AAG</b>), and Avadomide.
+</p>
+<p style="text-align: justify;">
+Using a custom KNIME workflow (<b>Figure 4, upper</b>), I analysed this chemical space at multiple levels. At the molecular level, the dataset contains over 3,000 unique canonical SMILES strings (processed by stripping stereochemical tokens like '@' for simplified initial analysis). As expected, the vast majority of these molecules contain <b>at least one cyclic imide substructure</b>, acting as the essential pharmacophore for CRBN binding (<b>Figure 4, lower</b>).
+</p>
+<p style="text-align: justify;">
+However, raw t-SNE visualisations at the molecular level can appear "fuzzy" due to the high density of similar or near-duplicate analogs — a problem that alternative algorithms like UMAP also struggled to resolve. To achieve a more distinct and interpretable visualisation, I abstracted the molecules to their <b>Bemis-Murcko scaffolds</b> (retaining only the union of ring systems and linkers) and performed <b>Maximum Common Substructure (MCS)</b> decomposition.
+</p>
+<p style="text-align: justify;">
+This hierarchical mapping revealed that while the majority of core scaffolds are rooted in the IMiD class, the merged dataset successfully captures modern chemical matter. For instance, cores 10 and 21 respectively represent the more recently developed PAG and PG scaffolds. This structural decomposition allows us to better navigate the diversity of the library and identify gaps for potential expansion.
 </p>
 <img src="photos_and_videos/figure_4a.png" alt="figure4a" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/><br>
 <img src="photos_and_videos/figure_4b.png" alt="figure4b" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 4</b>. The KNIME workflow to analyse CRBN-related databases integrated from <i>Enamine</i>, showing major distributions of chemical space represented at diverse levels based on Bemis-Murcko, MCS and R-group decomposition.</font>
-<br><br>
+<font size="2"><b>Figure 4</b>. The KNIME workflow to analyse CRBN-related databases integrated from <i>Enamine</i> catalog, showing major distributions of chemical space represented at diverse levels based on Bemis-Murcko, MCS and R-group decomposition.</font><br>
 
-### Insufficient Chemical Space for Covalent Modalities based on CRBN
+### Addressing the Covalent Modality Gap
 <p style="text-align: justify;">
-Then I merged two database together and obviously the <i>Enamine</i> set complement and enrich the chemical space from the public efficiently (<b>Figure 5</b>). There are few overlap but not too much, I guess this is because chemical supplier CROs tend to invent and sell novel hits with better synthetic feasibility rather than just replicate active substances which have been made and reported already. However, the space for covalent CRBN binders and corresponding protein degraders remain inadequate - there are only around 150 entries within 4500 records in the final library.
+By merging the curated public data with the Enamine dataset, I was able to significantly enrich the available chemical space (<b>Figure 5</b>). There is minimal overlap between the two: This is likely because commercial suppliers prioritise novel, synthetically accessible analogs rather than simply replicating previously reported active substances. Despite this expansion, a critical gap remains: <b>Covalent CRBN binders and their corresponding degraders are still under-represented, accounting for only ~150 entries out of the 4,500 records in the final library.</b>
 </p>
 <img src="photos_and_videos/figure_5.png" alt="figure5" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 5</b>. Two t-SNE maps showing the limited chemical space of covalent CRBN binders available from public databases.</font>
+<font size="2"><b>Figure 5</b>. Two t-SNE maps showing the limited chemical space of covalent CRBN binders available from public and Enamine databases.</font>
 <br><br>
 <p style="text-align: justify;">
-To enrich corresponding chemical space, I digged into some papers (DOIs in reference) published by Lyn Jones group in Dana-Farber as well as the latest patent (WO2025/096856A1) released from C4 Therapeutics. There are around 30 more covalent CRBN binders which have not been covered in the previous databases (<b>Figure 6</b>). I think most of them are just CRBN binders with the addtional covalency on HIS-353 (as shown in <b>Figure 1 left</b>) based on the mechanism as far as I know, all containing the fragment of Sulfonyl Fluorides for the desired reactivity. As an experienced drug designer in TPD industry, I realised there could be much more covalent modalities to be developed for CRBN-dependent binders/degraders based on the pipelines and structures recently reported from AZ, BMS, MonteRosa and Novartis... For example, IKZF2 target has an residue HIS-6 on its beta-sheet near G-loop (<b>Figure 1 mid</b>) while WIZ target contain the CYS-11 (<b>Figure 1 right</b>) which is also not far away from the IMiD-binding pocket on CRBN. <b>The question then becomes how to invent chemical space on those targets <i>in silico</i>.</b>     
+To address this sparsity, I conducted a targeted literature and patent search, focusing on work from the <b>Lyn Jones group</b> in Dana-Farber and a recent <b>C4 Therapeutics</b> patent (<b>WO2025/096856A1</b>). This yielded approximately 30 additional covalent CRBN binders not present in the initial databases (<b>Figure 6</b>). Most of these ligands function as reversible-covalent binders that target <b>HIS-353</b> (as shown in <b>Figure 1, left</b>) through a <b>sulfonyl fluoride</b> warhead.
 </p>
-<img src="photos_and_videos/figure_6.png" alt="figure6" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<img src="photos_and_videos/figure_6.png" alt="figure6" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 6</b>. The structure of some novel CRBN binders based on the covalency with HIS-353, extracted from recent journals and patents by AI tool <i>DECIMER</i>.</font>
-
-## Synthetic Data Generation by Classic Cheminformatics
+<br><br>
 <p style="text-align: justify;">
-In cheminformatics, one of the most robust way to enumurate chemicals is based on virtual reactions from/between/among different building blocks. We have seen so many examples of using synthons for creating real drug-like molecules which are ready to be made by wet-lab chemists. Meanwhile, most IMiD and Glutarimide derivatives in current datase bear phenyl and other armoatic functionalities. Given limited experience of organic synthesis in my mind, the C-H activation for adding covalent warheads could be a applicable strategy herein. For quick and dirty enrichment, I defined a two-component reaction smarts using rdkit in order to functionalise each sp2-hybridised [c&H1] on each candidate in the dataset (<b>Figure 7</b>). There are around 10-15 warheads I think commonly used for covalent drug discovery where cysteine or histidine is available around the active site. They are supposed to provide enough covalent chemical space built on the CRBN database filled with non-covalent precursors as mentioned (<b>Figure 5</b>).
+From my perspective as an industrial drug designer, the potential for covalent modalities in CRBN-dependent degradation is far broader than what is currently documented. Recent structural data and pipelines from <b>AstraZeneca, BMS, Monte Rosa, and Novartis</b> suggest several untapped opportunities. For instance:
+
+1. The <b>IKZF2</b> neosubstrate features a <b>HIS-6</b> residue on its $\beta$-sheet near the G-loop (<b>Figure 1, middle</b>).
+2. The <b>WIZ</b> neosubstrate also contains a <b>CYS-11</b> residue positioned near the IMiD-binding pocket on CRBN (<b>Figure 1, right</b>).
+
+Both residues present strategic handles for covalent engagement. <b>The challenge now lies in how to "invent" and explore this hypothetical chemical space <i>in silico</i> to target these specific residues.</b>
 </p>
-<img src="photos_and_videos/figure_7.png" alt="figure7" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+
+## Synthetic Data Generation via Classic Cheminformatics 
+<p style="text-align: justify;">
+In cheminformatics, one of the most robust methods for library enumeration is the use of <b>virtual reactions</b> between building blocks (synthons). This approach ensures that the resulting "drug-like" molecules are synthetically accessible for wet-lab validation. Given that most IMiD and glutarimide derivatives in my current dataset feature phenyl or other aromatic systems, I utilised a <b>C-H activation strategy</b> to append covalent warheads virtually.
+</p>
+<p style="text-align: justify;">
+For this rapid enrichment, I defined a two-component <b>Reaction SMARTS</b> using RDKit to functionalize sp2-hybridised [c;H1] atoms on each candidate in the dataset (<b>Figure 7</b>). I curated a suite of 10–15 warheads commonly employed in covalent drug discovery for targeting proximal cysteine or histidine residues. This strategy successfully transformed non-covalent precursors into a vast, covalent-focused chemical space.
+</p>
+<img src="photos_and_videos/figure_7.png" alt="figure7" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 7</b>. The example of two-component reaction to enumurate one IMiD candidate with covalent handles using aromatic C-H functionalisation virtually.</font>
 <br><br>
-Since the organic database is originally from commercial source, I also managed to perform few extra steps below for the robustness of generation:<br>
-<b>1. Remove most protecting groups using defined smarts reactions</b> (carbamate to amine, ester hydrolysis, hydroxyl deprotections etc...)<br>
-<b>2. Before the covalent transformation, degenerate diverse structures into Murcko scaffolds for the simplicity as hit library</b> (downsized approximately from 4000 to 2500)<br>
-<b>3. After the covalent transformation, ensure imide substructure still exist but not undesired substructures</b> (using 'pains' list except phthalimide and reactive warheads' smarts)<br><br>
 <p style="text-align: justify;">
-By the way, I prompted AI agents <i>Gemini 3 Pro</i> and <i>Claudex 4</i> using my <i>Copilot Pro</i> account for above tasks. Each individual rdkit function was coded almost perfectly I have to say, but these LLMs failed to have thoughtful consideration when no progressive direction (chatbox command instructions + markdown file protocols) is given by myself as a human cheminformatician to deal with such complex chemical database. The agent itself either forgot to clean protective fragments or just generate invalid/unmatched smarts variables against processing... It seems that we still need to develop chemistry-specialised language models and agents if people want to further unleash productivity.
+To ensure the robustness and quality of the generated library, I implemented several critical post-processing steps:
+
+1. <b>Deprotection</b>: Before the aromatic C-H activation, I applied other SMARTS-based transformations to remove common protecting groups (e.g., converting carbamates to amines, ester hydrolysis, and hydroxyl deprotections).
+
+2. <b>Scaffold Simplification</b>: Prior to covalent transformation, I also abstracted the diverse structures into their Bemis-Murcko scaffolds to simplify the hit library, reducing the starting pool from approximately 4,000 to 2,500 unique frameworks.
+
+3. <b>Quality Control</b>: After enumeration, I verified the presence of the essential imide pharmacophore and filtered out undesired substructures using a modified PAINS list - carefully excluding the phthalimide core and the intended reactive warheads from the 'bad' SMARTS filter.
+</P>
+<p style="text-align: justify;">
+During this process, I leveraged AI agents like <b>Gemini</b> and <b>Claude</b> via <b>Copilot Pro</b> to assist with coding. While these LLMs generated individual RDKit functions with high precision, they struggled with the "big picture" logic required for complex database workflows. Without iterative, human-led direction (through structured markdown protocols and specific prompts), the agents sometimes failed to clean protective groups or generated invalid SMARTS variables. This underscores a current truth for industry-level applications: While LLMs are powerful coding assistants, we still require <b>chemistry-specialised language models</b> to fully automate the digital stage of drug discovery with scientific logic.
 </p>
 <p style="text-align: justify;">
-Getting back to the topic, the cheminformatic workflow afforded the amount of 137673 potential covalent CRBN candidates (all MW below 600Da) where a subset of 19678 entries contain the Sulfonyl Fluoride or Fluorosulfate targeting histidine while others could be reactive with cysteine. <b>I think the chemical space become redundent now and it is the time to refine and enrich positives confidently using physics.</b>  
+Anyway, this cheminformatics workflow yielded <b>137673 potential covalent CRBN candidates</b> (all with MW < 600 Da). Within this set, 19678 entries contain sulfonyl fluoride or fluorosulfate groups for targeting histidine, while the remainder are designed for cysteine reactivity. <b>With a redundant chemical space at the moment, the next stage is to utilise physics-based refinement to confidently identify high-priority hits.</b>
 </p>
 
 ## Covalent Docking with Structural Constraints
 <p style="text-align: justify;">
-For virtual screening over 10000 candidates from the previous enumeration, the standard method is molecular docking based on available structure information. According to the quary search from RCSB, most PDB structures in the database are actually holo CRBN co-crystals in closed state (i.e., active for target degradation), either with isoform 4 sequence (uniport A4TVL0) or with human sequence (uniport Q96SW2). Some of these structures would be used to prioritise the chemical space for developing covalent CRBN modulators, molecular glus and PROTACs.  
+To screen the ~140,000 candidates generated from our enumeration, I employed molecular docking guided by high-resolution structural data. A query of the <b>RCSB PDB</b> reveals that most available structures represent the <b>"closed" (active) state of CRBN, which is the conformation required for neosubstrate degradation</b>. These include both the isoform 4 (UniProt <b>A4TVL0</b>) and standard human (UniProt <b>Q96SW2</b>) sequences. These structures are essential for prioritising chemical space for covalent modulators, molecular glues, and PROTACs.
 </p>
 
-### Techniques for Reliable Models in Docking Test
+### Ensuring Reliability in Docking Models
 <p style="text-align: justify;">
-To test the ensemble docking with reported covalent binders at the beginning, I selected 4TZ4, 5V3O and 8OJH, three high-resolution crystallography of human CRBN closed binary complex (<b>Figure 8</b>), all preserved IMiD ligand scaffolds and conserved binding site under alignment. I believe these consistent structual constraints are suitable to embrace and lock the chemical space as what pursued.
+For the initial ensemble docking validation, I selected three high-resolution crystal structures of human CRBN in the closed binary state: <b>4TZ4, 5V3O, and 8OJH (Figure 8)</b>. These structures show highly conserved IMiD-binding sites. By aligning these models, I established a consistent set of structural constraints to "lock" the chemical space and ensure our virtual screening remains biologically relevant.
 </p>
 <img src="photos_and_videos/figure_8.png" alt="figure8" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 8</b>. The aligned crystal structures of CRBN-IMiD complex used for ensemble docking with enumurated datebase in order to enrich covalent binding hits engaging HIS-353.</font>
-<br><br>
+<font size="2"><b>Figure 8</b>. The aligned crystal structures of CRBN-IMiD complex used for ensemble docking with enumurated datebase, which is to enrich covalent binding hits engaging HIS-353.</font><br>
+
+#### Preparing Ligand before Docking
 <p style="text-align: justify;">
-Herein, the flexible sidechain mode of AutoDock4 (AD4) was used to process covalent docking based on my experience. It blurs the targeted covalent residue atomtypes and charges in pdbqt grid map, but requires the ligand conjugate anchored on the backbone CA position as expected. To perpare the conjugate, a smarts reaction was defined to create the modality including sidechain. I also did a quick free conformational search/min (ETKDG/MMFF) as well as cyclic imide pharacophore shape alignment (bestRMS < 2A to bioactive Glutarimide as MCS) for picking up the initial 3D rotamer bearing a proper structure of such ring fragment (<b>Figure 9</b>) - so only those freely rotatable torsions are manipulated and searched by AD4 genetic MC algorithm under translational+rotational transformations in the fixed pocket grid.
+I utilised the flexible sidechain mode of AutoDock4 (AD4) for the covalent docking workflow. This method involves masking the target covalent residue's atom types and charges in the PDBQT grid map, while the ligand-adduct is "anchored" to the protein backbone at the Ca position. To prepare these conjugates, I defined a SMARTS-based transformation to create the ligand-sidechain adduct object in 2D (<b>Figure 9</b>).
+</p>
+<p style="text-align: justify;">
+Furthermore, I performed a two-step conformer preparation:
+
+1. Conformational Sampling: Initial 3D rotamers were generated using the ETKDG method followed by MMFF minimisation.
+2. Pharmacophore Alignment: I applied a shape-alignment filter, selecting only those conformers where the cyclic imide pharmacophore maintained an $RMSD < 2$ Å relative to the bioactive glutarimide pose.
 </p>
 <img src="photos_and_videos/figure_9.png" alt="figure9" width="360px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 9</b>. The smarts reaction for preparing histidine covalent ligand adducts used in flexible sidechain docking, followed by Glutarimide (MCS) pharacophore shape alignment to select the initial conformer of each ligand.</font>
+<font size="2"><b>Figure 9</b>. The SMARTS reaction for preparing histidine covalent ligand adducts used in flexible sidechain docking, followed by Glutarimide MCS pharmacophore shape alignment to select the initial conformer of each ligand.</font>
 <br><br>
 <p style="text-align: justify;">
-One common chanllenge in molecular docking is to ensure ligands fitting into the right position. Even though the Cartesian location of grid box (20-30 A depending on ligands' size in library) provide some spatial contraints, we could still see some docking conformations shift to cavities that are not normally occupied by the reference ligand. For instance, a covalent CRBN binder explored sites (4 of 5 from AD4 docking clusters) apart from the IMiD pocket (<b>Video 10</b>). Certainly it does not mean those novel poses are completely non-sense, these scenario are rarely seen during the lead optimisation especially when we are confident with the SAR based on the core scaffold with pharamacophores. Some commercial softwares (e.g., Schrodinger Glide) are able to perform core/shape-constrained docking provided with a bioactive ligand conformation and its smarts pattern for reference. Herein, I instructed AI to write an alternative rdkit function for the pose selection with reference containing cyclic imide (<b>Text 11</b>). Because we are dealing with post-docking structures, no re-alignment is needed for calculating RMS to the reference based on their MCS of Glutarimide.
+Through providing a pre-aligned "bioactive-like" starting conformation, the AD4 Genetic Algorithm only needs to explore the remaining freely rotatable torsions under translational and rotational transformations, significantly improving the efficiency of the search within the fixed grid.
 </p>
+
+#### Overcoming Docking Pose Drift with Custom Constraints
+<p style="text-align: justify;">
+A common challenge in virtual screening is <b>"pose drift"</b>, where ligands dock into peripheral cavities rather than the intended pocket. Even with a defined grid box (20-30 Å), we often observe clusters where the ligand deviates from the reference IMiD coordinates. For example, in one test case below, 4 out of 5 docking clusters occupied sites distal to the IMiD pocket (<b>Video 10</b>).
+</P>
 <video controls>
   <source src="photos_and_videos/video_10.mp4" type="video/mp4">
 </video>
-<font size="2"><b>Vedio 10</b>. The covalent CRBN docking example showing diverse binding modes generated from AD4 algorithm and scoring functions, which requires further filtration and selection.</font>
+<font size="2"><b>Vedio 10</b>. A covalent CRBN docking example showing diverse binding modes generated from AD4 algorithm and scoring functions, which must require further filtration and selection.</font>
 <br><br>
+<p style="text-align: justify;">
+While commercial software like <b>Schrödinger Glide</b> offers built-in constrained docking by core or/and shape, I developed a custom solution by instructing my AI agent to write an RDKit-based post-docking filter (<b>Text 11</b>). This function calculates the MCS-based RMSD of the glutarimide core against the reference crystal pose. Since the docking was performed in a fixed coordinate system, no further alignment is required - We can simply filter for poses that maintain the essential binding geometry of the imide headgroup.
 
 ```python
 def get_mcs_rmsd(query_sdf_path, ref_sdf_path, aligned_sdf_path, aligned=False, cutoff=2.0):
@@ -165,34 +213,37 @@ def get_mcs_rmsd(query_sdf_path, ref_sdf_path, aligned_sdf_path, aligned=False, 
 
         return None, None
 ```
-<font size="2"><b>Text 11.</b> The Python code to get RMSD values of MCS (cyclic imide) from query conformations to a reference in sdf format, and to get the best matched pose for docking selection.</font><br>
+<font size="2"><b>Text 11.</b> The Python function to get RMSD values of MCS (i.e., cyclic imide) from query conformations (e.g., docked) to a reference in SDF format, in order to get the best matched pose for final selection.</font><br>
 
 ### Virtual Screening Results
 <p style="text-align: justify;">
-Following several days of computational time in my PC using above docking tricks, I managed to refine the chemical space in silico for covalent CRBN binders and degraders targeting IKZF2 and WIZ. The VS for covalent MG ligands in binary and IKZF2 ternary complex are easier becasue their histidines are already in proximity to the binding site near G-loop (<b>2nd & 3rd rows in Figure 12</b>). Meanwhile the CYS-11 from WIZ is a bit distant from the Glutarimide according to structures (<b>1st row in Figure 12</b>), which would require PROTAC-like scaffolds to bridge such gap for the proximity. Apart from these, we need some empirial critira to ensure the drug-likeness from positive docking poses especially when docked candidates are still too much.
+Following several days of intensive computation locally using the docking strategies described above, I successfully refined the <i>in silico</i> chemical space for covalent CRBN binders and degraders targeting <b>IKZF2</b> and <b>WIZ</b>. The virtual screening for covalent ligands in the binary and <b>IKZF2</b> ternary complexes was relatively straightforward, as two target histidines are in close proximity to the IMiD binding site near the G-loop (<b>Figure 12, rows 2 & 3</b>). In contrast, CYS-11 in the <b>WIZ</b> neosubstrate is more distal from the glutarimide-binding pocket (<b>Figure 12, row 1</b>). This structural gap necessitates "PROTAC-like" bifunctional scaffolds to bridge the distance and ensure effective proximity for covalent engagement.
 </p>
 <img src="photos_and_videos/figure_12.png" alt="figure12" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 12</b>. Some packing states in available ternary complex co-crystal structures for WIZ (1st row, 8TZX/9DJX) and IKZF2 (2nd & 3rd rows, 7U8F/7LPS), showing different proximities needed for developing covalent modalities to stabilise coresponding complexes. 
-</font>
+<font size="2"><b>Figure 12</b>. Some packing states in ternary complex co-crystal structures available for <b>WIZ</b> (upper row, 8TZX/9DJX) and <b>IKZF2</b> (middle and lower rows, 7U8F/7LPS), showing different proximities needed for developing covalent modalities to stabilise coresponding complexes.</font><br>
 
 #### Covalent CRBN Binders and IKZF2 Degraders
 <p style="text-align: justify;">
-For the covalent CRBN binder excluding target protein, 36554 valid poses were afforded from docking selection (<b>Video 13</b>). Since all stereochemistry were ennumurated before conformational preparations and docking, I converted these 3D objects back to 2D canonical smiles without any stereo-label which is to streamline later QSAR and generative AI studies. Also the principle chiral centre at the C3 position of Glutarimide racemise quickly <i>in vivo</i>... The resulting 14042 unique molecules were filtrated by 3 criteria:<br>
-<b>1. Binding score (AD4 covalent mode) < -10 kcal/mol</b><br>
-<b>2. Molecular weight < 500 Da</b><br>
-<b>3. Rotatable bond count < 7</b><br>
-The logics was to find proximate ligand but not overwhelmed by the size (a common bias in docking algorithm where larger molecule tends to scored with lower binding energy). The limited number of rotatable bonds also ensured the drug-likeness without too much entropic penality or strain energy against binding. These criteria eliminate 14000 redundent candidates to around 1500 reasonably (<b>Figure 14</b>). 
+For the covalent CRBN binders (binary system), 36554 valid poses passed the initial docking and pharmacophore filter (<b>Video 13</b>). To streamline downstream QSAR and generative AI studies, these 3D poses were converted back to 2D canonical SMILES. I decided to remove stereochemical labels at this stage, as the chiral center at the C3 position of the glutarimide ring is known to racemise rapidly <i>in vivo</i>.
 </p>
 <video controls>
   <source src="photos_and_videos/video_13.mp4" type="video/mp4">
 </video>
 <font size="2"><b>Video 13</b>. All ensemble docking poses that are selected to match the Glutarimide pharacophore in reference ligands from binary co-crystallography (4TZ4/5V3O/8OJH).</font>
 <br><br>
+<p style="text-align: justify;">
+The resulting 14042 unique molecules were filtered using three empirical criteria to ensure drug-likeness and minimise docking artifacts:
+
+1. <b>Binding Score (AD4 covalent mode):</b> $< -10$ kcal/mol (to ensure the basic proximity needed).
+2. <b>Molecular Weight (MW):</b> $< 500$ Da (to mitigate the inherent bias of docking algorithms toward larger molecules).
+3. <b>Rotatable Bond Count (nRotB):</b> $< 7$ (to keep conformational stability while limit entropic penalties).
+
+These rigorous filters refined the library from over 14000 candidates to a high-priority set of approximately 1500 compounds (<b>Figure 14</b>).
 <img src="photos_and_videos/figure_14.png" alt="figure14" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 14</b>. The distribution and cumulative plots of positive candidates enrichment passing 3 defined criteria for covalent CRBN binders.</font>
 <br><br>
 <p style="text-align: justify;">
-For the covalent IKZF2 degrader, I loose the criteria of MW and nRotB (< 550 Da & < 8) but tighten the cutoff for binding score (< -11 kcal) after docking. This garentee the complementarity towards degrading target and its histidine residue in ternary complex based on my experience (<b>Video 15 & Figure 16</b>). Overall, around 1000 entries were prioritised from over 10000 valid docking poses. There are some candidates even having their scaffolds overlaied with the exposed pharmacophore of aromaticity in shape, which built the confidence for further drug design based on such VS if anyone else want to try (I am no more synthetic chemist unfortunately...)
+For the IKZF2 covalent MG degraders, I adjusted the thresholds to reflect the increased complexity of the ternary interface: I loosened the MW and nRotB limits (< 550 Da and < 8) but tightened the binding score cutoff (< -11 kcal/mol). This ensured high complementarity within the ternary complex (<b>Video 15</b> & <b>Figure 16</b>). Approximately 1000 entries were prioritised, with several candidates showing excellent shape complementarity to the aromatic pharmacophores in reference, providing strong structural hypotheses for further medicinal chemistry optimisation.
 </p>
 <video controls>
   <source src="photos_and_videos/video_15.mp4" type="video/mp4">
@@ -200,17 +251,17 @@ For the covalent IKZF2 degrader, I loose the criteria of MW and nRotB (< 550 Da 
 <font size="2"><b>Video 15</b>. All ensemble docking poses that are selected to match the Glutarimide pharacophore in reference ligands from IKZF2 ternary complexes (7U8F/7LPS).</font>
 <br><br>
 <img src="photos_and_videos/figure_16.png" alt="figure16" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 16</b>. The distribution and cumulative plots of positive candidates enrichment passing 3 tailored criteria for IKZF2 covalent MGs.</font>
+<font size="2"><b>Figure 16</b>. The distribution and cumulative plots of positive candidates enrichment passing 3 tailored criteria for IKZF2 covalent MGs.</font><br>
 
 #### Covalent WIZ Degraders
 <p style="text-align: justify;">
-Targeting CYS-11 in CRBN-WIZ ternary complex is more challenging, not only because cysteine favours diverse warheads that are usually different from histidine but also its position is away from the binding interface as mentioned before. To prepare ligands for covalent docking, I checked the shortest bonding pathlength (SBP) on 2D graph structure from imide nitrogen to electrophilic carbon (thanks to Gemini for the tip of such rdkit function) and then defined 9 suitable reactions with the cysteine sidechain in order to reduce the size of library containing over 100000 precursors from previous enumuration (<b>Figure 17</b>).
+Targeting CYS-11 in the CRBN-WIZ complex presented a greater challenge - Cysteine residues typically require different warheads than histidine, and as noted, the residue is located further from the binding interface. To focus the library, I calculated the <b>Shortest Bonding Pathlength (SBP)</b>, the number of bonds on the 2D graph from the imide nitrogen to the electrophilic carbon, using a custom RDKit function. I restricted the library to precursors with a SBP >= 13 to ensure the linker was long enough to reach the target residue (<b>Figure 17</b>).
 </p>
 <img src="photos_and_videos/figure_17.png" alt="figure17" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 17</b>. The pre-docking process to focus the library on cys-dependent PROTAC-like WIZ covalent degraders. Those candidates with 13 SBP at least were chosen for subsquent covalent additions and ligand preparations.</font>
+<font size="2"><b>Figure 17</b>. For WIZ covalent degraders, a pre-docking process to focus the library with cysteine dependency. Those candidates with at least 13 SBP were chosen for subsequent covalent additions and ligand preparations.</font>
 <br><br>
 <p style="text-align: justify;">
-The covalent docking with WIZ afforded many satifactory poses and drug-like hits from my perspective (<b>Video 18</b>). This time I tighten both critira of docking score (< -12.5 kcal/mol) and nRotB (< 7) for the desired cooperativity in PROTAC development (<b>Figure 19</b>). The majority of winners bear cyanamide warhead while only few poses are based on the Michael addition. There are many L-shape scaffolds observed to complement the interface between CRBN and WIZ. Again these VS structures are attached in my github repository for any researcher interested in further development potentially.
+Covalent docking against <b>WIZ</b> yielded several promising drug-like hits (<b>Video 18</b>). For this set, I tightened both the docking score (< -12.5 kcal/mol) and nRotB (< 7) to prioritise molecules with high <b>"cooperativity"</b> and low internal strain (<b>Figure 19</b>). Interestingly, the top-scoring candidates predominantly featured cyanamide warheads, with fewer types of Michael acceptor. Many of these "winners" adopted L-shaped conformations, perfectly complementing the CRBN-WIZ interface. Again these designs are attached in my GitHub/HuggingFace repository for any potential development of interest.
 </p>
 <video controls>
   <source src="photos_and_videos/video_18.mp4" type="video/mp4">
@@ -218,21 +269,28 @@ The covalent docking with WIZ afforded many satifactory poses and drug-like hits
 <font size="2"><b>Video 18</b>. All ensemble docking poses that are selected to match the Glutarimide pharacophore in reference ligands from WIZ ternary complexes (8TZX/9DJX).</font>
 <br><br>
 <img src="photos_and_videos/figure_19.png" alt="figure19" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 19</b>. The distribution and cumulative plots of positive candidates enrichment passing 3 tailored criteria for WIZ covalent PROTACs.</font>
+<font size="2"><b>Figure 19</b>. The distribution and cumulative plots of positive candidates enrichment passing 3 tailored criteria for WIZ covalent PROTACs.</font><br>
 
 ## QSAR Modelling
 <p style="text-align: justify;">
-Following above VS screening results, both covalent and non-covalent CRBN binders were merged together to enrich the original CRBN chemical database with diverse covalent modalities. I used the QED score over 0.5 (a druglikeness index balance Lipinski's rules etc.) to further filter all covalent docking candidates already passing my criterias, which made corresponding library size shrink to around 2500 - a fairly reasonable amount regarding the non-covalent CRBN candidate pool (size just over 4000) from open and enamine databases (<b>Figure 20</b>). For the QSAR modelling, I decided to start with a classification task which is commonly used for binary decision-making in industry when the early-stage data is high-throughput but noisy. This prior would also guide later regression model and generative AI to have more confidence for the desired predictions.
-</p>         
+Following the virtual screening results, I merged the prioritised covalent candidates with the original non-covalent CRBN binder pool to create an enriched, multi-modality database. To ensure high-quality leads, I applied a final filter using the <b>Quantitative Estimate of Drug-likeness (QED)</b> score, setting a threshold of > 0.5. This index balances several physicochemical properties, including Lipinski’s rules, to assess overall lead-likeness. This refined the covalent library to approximately 2500 compounds, a size comparable to the non-covalent pool (~4000 compounds) derived from open-source and Enamine databases (<b>Figure 20</b>).
+</p>
 <img src="photos_and_videos/figure_20.png" alt="figure20" width="480px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 20</b>. The distribution of chemical space between covalent and non-covlant classes for CRBN.</font>
-
-### Classification Task to Identify Covalent CRBN Ligand
+<font size="2"><b>Figure 20</b>. The distribution of chemical space between covalent and non-covalant classes for CRBN.</font>
+<br><br>
 <p style="text-align: justify;">
-The chemical identification is a common task especially in toxicity study. Rather than determining whether a substance is hazard or not, here it was applied to identify covalent CRBN candidate with ML approaches. Since I have annotated most common covalent warheads somehow in a previous step (please check <b>Figure 7</b>), the purpose was to build a model that try to learn my experience as a chemist so such modality could be classified automatically.
+For the initial QSAR study, I focused on a <b>classification task</b>. Binary classification is commonly used in industrial drug discovery, particularly when dealing with early-stage, high-throughput data that may be inherently noisy before making any initial decision. Establishing a robust classifier serves as a prerequisite, providing a "prior" that guides subsequent regression models and generative AI toward higher-confidence predictions.
+</p>
+
+### Classification Task: Identifying Covalent CRBN Ligands
+<p style="text-align: justify;">
+While chemical identification is frequently used in toxicology to flag hazardous substances, I applied it here to distinguish covalent CRBN candidates using ML. Since I had previously annotated the common covalent warheads (<b>Figure 7</b>), the purpose was to develop a model that captures the "chemist's intuition" — automating the recognition of these specific modalities within the CRBN-binding context.
 </p>
 <p style="text-align: justify;">
-<b>For practical ML in chemistry as indiviual researcher, a key point is to focus on the specific domain.</b> When the data was prepared as shown in <b>Figure 20</b>, I also tried to include some covalent modalities from other enamine library even though they are not from the CRBN chemical space at all. However I realised those noise (i.e., positive for covalency but negative for CRBN covalency) actually confuse the machine to learn effective patterns, either through embedded fingerprints or node/edge/graph-level matrix, that are responsible for the covalency in CRBN space... Unless for transferred learning (in that case one also need to enrich the universe of non-crbn & non-covalent space), it is better to build a small model straightforwardly that is suitable for specific task in the field of each drug discovery project.        
+<b>In practical cheminformatics, success often depends on focusing on the specific chemical domain</b>. During data preparation, I initially experimented with including covalent molecules from other Enamine libraries unrelated to CRBN (lower left, <b>Figure 20</b>). However, I found that this "out-of-domain" data acted as just noise. Including positives for general covalency that were negative for CRBN binding confused the model, making it difficult for the machine to extract the specific structural patterns, whether through molecular fingerprints or graph-based matrices, that define the CRBN-covalent space.
+</p>
+<p style="text-align: justify;">
+Unless one is pursuing a large-scale <b>transfer learning</b> approach (which would require a massive expansion of the "non-CRBN/non-covalent" negative space as shown in upper left, <b>Figure 20</b>), it is generally more effective to build a lean, focused model. From my personal working experience, a model tailored specifically to the chemical project at hand is often more accurate and interpretable than a generalised one.
 </p>
 
 #### Classic Machine Learning with SVM and Tree Classifiers (RF and XGBoost)
@@ -252,7 +310,7 @@ Two common tree models, Random Forest (RF) and extreme gradient boosting (XGBoos
 <font size="2"><b>Figure 22</b>. The top-feature importance plot based on Morgan fingerprints respectively for tuned SVM, RF and XGBoost models, to classify the covalent modality from others in CRBN chemical space.</font>
 <br><br>
 <p style="text-align: justify;">
-Noteworthy, tuning the hyperparameter with grid search is a time-consuming step to establish a model properly in days. With the help from Claude, Bayesian optimisation using optuna module was coded and tried to search for a best set of hyperparameters (<b>Test 23</b>). Under 100 iterations in just few hours, the algorithm found a XGBoost model which is competible to classify all testset correctly based on similar feature importances. This reminded me with MCMC (Markov Chain Monte Carlo - also a type of Bayesian/Gaussian process if I am correct) for searching low-energy molecular conformations efficiently as I mentioned in the previous blog. <b>To find global optimum/minimum in a distribution or an energy landscape for example, we might not always need all trials based on <i>ab initio</i> physics. The sufficient high-quality data, empirical paradigms (e.g., DFT, force-field potential or even just model architecture) and approperate statistical methods together could lead us to the ground truth faster despite the approximation in anyway (i.e., the ideology of engineering).</b> This is my simple understanding so far in data science as physical chemist doing interdisciplinary studies...                      
+Noteworthy, tuning the hyperparameter with grid search is a time-consuming step to establish a model properly in days. With the help from Claude, Bayesian optimisation using optuna module was coded and tried to search for a best set of hyperparameters (<b>Test 23</b>). Under 100 iterations in just few hours, the algorithm found a XGBoost model which is competible to classify all testset correctly based on similar feature importances. This reminded me with MCMC (Markov Chain Monte Carlo - also a type of Bayesian/Gaussian process if I am correct) for searching low-energy molecular conformations efficiently as I mentioned in the previous blog. <b>To find global optimum/minimum in a distribution or an energy landscape for example, we might not always need all trials based on <i>ab initio</i> physics. The sufficient high-quality data, empirical paradigms (e.g., DFT, force-field potential or even just model architecture) and approperate statistical methods together could lead us to the ground truth faster despite the approximation in anyway (i.e., the ideology of engineering).</b> This is my simple understanding so far in data science as a physical chemist doing interdisciplinary studies...                      
 </p>
 
 ```python
@@ -494,7 +552,7 @@ Comparing HOMO, LUMO and gap energies between the covalent and the non-covalent 
 $$\omega = \frac{(E_{H} + E_{L})^2}{4(E_{L} - E_{H})}$$
 
 <p style="text-align: justify;">
-Nevertheless, these molecular-level QM features are insufficient to classify the covalency confidently in desired chemical space. This was also confirmed by researches from Bayer and Boehringer Ingelheim (DOIs in reference). We might need some further physical calculations associated with the warhead fragment (e.g., atom attribute of Fukui indices in FMO, reaction activation energy with nucleophilic residue etc.) in order to convince ourself of actual covalency for CRBN-based binder or degrader... Given that LUMO value is more relevant to electrophilicity (i.e., the orbital which accept electrons) and its distribution approach Gaussian in our chemical space (<b>Figure 28 second</b>), I decided to test some regression models on it.               
+Nevertheless, these molecular-level QM features are insufficient to classify the covalency confidently in desired chemical space. This was also confirmed by researches from Bayer and Boehringer Ingelheim (DOIs in reference). We might need some further physical calculations associated with the warhead fragment (e.g., atom attribute of Fukui indices in FMO, reaction activation energy with nucleophilic residue etc.) to convince ourself of actual covalency for CRBN-based binder or degrader... Given that LUMO value is more relevant to electrophilicity (i.e., the orbital which accept electrons) and its distribution almost approach Gaussian-type in our chemical space (<b>Figure 28 second</b>), I decided to test some regression models on it.               
 </p>
 
-#### Benchmarking Models for LUMO Prediction
+#### Benchmarking ML Models for LUMO Prediction
