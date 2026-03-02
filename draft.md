@@ -79,22 +79,22 @@ This hierarchical mapping revealed that while the majority of core scaffolds are
 
 ### Addressing the Covalent Modality Gap
 <p style="text-align: justify;">
-By merging the curated public data with the Enamine dataset, I was able to significantly enrich the available chemical space (<b>Figure 5</b>). There is minimal overlap between the two: This is likely because commercial suppliers prioritise novel, synthetically accessible analogs rather than simply replicating previously reported active substances. Despite this expansion, a critical gap remains: <b>Covalent CRBN binders and their corresponding degraders are still under-represented, accounting for only ~150 entries out of the 4,500 records in the final library.</b>
+By merging the curated public data with the Enamine dataset, I was able to significantly enrich the available chemical space (<b>Figure 5</b>). There is minimal overlap between the two: This is likely because commercial suppliers prioritise novel, synthetically accessible analogs rather than simply replicating previously reported active substances. Despite this expansion, a critical gap remains: <b>Covalent CRBN binders and their corresponding degraders are still under-represented, accounting for only ~150 entries out of the 4500 records in the final library.</b>
 </p>
 <img src="photos_and_videos/figure_5.png" alt="figure5" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 5</b>. Two t-SNE maps showing the limited chemical space of covalent CRBN binders available from public and Enamine databases.</font>
 <br><br>
 <p style="text-align: justify;">
-To address this sparsity, I conducted a targeted literature and patent search, focusing on work from the <b>Lyn Jones group</b> in Dana-Farber and a recent <b>C4 Therapeutics</b> patent (<b>WO2025/096856A1</b>). This yielded approximately 30 additional covalent CRBN binders not present in the initial databases (<b>Figure 6</b>). Most of these ligands function as reversible-covalent binders that target <b>HIS-353</b> (as shown in <b>Figure 1, left</b>) through a <b>sulfonyl fluoride</b> warhead.
+To address this sparsity, I conducted a targeted literature and patent search, focusing on recent works from the <b>Lyn Jones group</b> in Dana-Farber (DOIs in reference) and a recent <b>C4 Therapeutics</b> patent (<b>WO2025/096856A1</b>). This yielded approximately 30 additional covalent CRBN binders not present in the initial databases (<b>Figure 6</b>). Based on the reported mechanism, most of these ligands function as reversible-covalent binders that target <b>HIS-353</b> through a <b>sulfonyl fluoride</b> warhead (as shown in left, <b>Figure 1</b>).
 </p>
 <img src="photos_and_videos/figure_6.png" alt="figure6" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 6</b>. The structure of some novel CRBN binders based on the covalency with HIS-353, extracted from recent journals and patents by AI tool <i>DECIMER</i>.</font>
 <br><br>
 <p style="text-align: justify;">
-From my perspective as an industrial drug designer, the potential for covalent modalities in CRBN-dependent degradation is far broader than what is currently documented. Recent structural data and pipelines from <b>AstraZeneca, BMS, Monte Rosa, and Novartis</b> suggest several untapped opportunities. For instance:
+From my perspective as an industrial drug designer, the potential for covalent modalities in CRBN-dependent degradation is far broader than what is currently documented. Recent structural data and pipelines from <b>AstraZeneca, BMS, MonteRosa, and Novartis</b> suggest several untapped opportunities. For instance:
 
-1. The <b>IKZF2</b> neosubstrate features a <b>HIS-6</b> residue on its $\beta$-sheet near the G-loop (<b>Figure 1, middle</b>).
-2. The <b>WIZ</b> neosubstrate also contains a <b>CYS-11</b> residue positioned near the IMiD-binding pocket on CRBN (<b>Figure 1, right</b>).
+1. The <b>IKZF2</b> neosubstrate features a <b>HIS-6</b> residue on its $\beta$-sheet near the G-loop (middle, <b>Figure 1</b>).
+2. The <b>WIZ</b> neosubstrate also contains a <b>CYS-11</b> residue positioned near the IMiD-binding pocket on CRBN (right, <b>Figure 1</b>).
 
 Both residues present strategic handles for covalent engagement. <b>The challenge now lies in how to "invent" and explore this hypothetical chemical space <i>in silico</i> to target these specific residues.</b>
 </p>
@@ -107,19 +107,19 @@ In cheminformatics, one of the most robust methods for library enumeration is th
 For this rapid enrichment, I defined a two-component <b>Reaction SMARTS</b> using RDKit to functionalize sp2-hybridised [c;H1] atoms on each candidate in the dataset (<b>Figure 7</b>). I curated a suite of 10–15 warheads commonly employed in covalent drug discovery for targeting proximal cysteine or histidine residues. This strategy successfully transformed non-covalent precursors into a vast, covalent-focused chemical space.
 </p>
 <img src="photos_and_videos/figure_7.png" alt="figure7" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 7</b>. The example of two-component reaction to enumurate one IMiD candidate with covalent handles using aromatic C-H functionalisation virtually.</font>
+<font size="2"><b>Figure 7</b>. The example of two-component reaction based on rdkit module to enumurate one IMiD candidate with covalent handles using aromatic C-H functionalisation virtually.</font>
 <br><br>
 <p style="text-align: justify;">
 To ensure the robustness and quality of the generated library, I implemented several critical post-processing steps:
 
 1. <b>Deprotection</b>: Before the aromatic C-H activation, I applied other SMARTS-based transformations to remove common protecting groups (e.g., converting carbamates to amines, ester hydrolysis, and hydroxyl deprotections).
 
-2. <b>Scaffold Simplification</b>: Prior to covalent transformation, I also abstracted the diverse structures into their Bemis-Murcko scaffolds to simplify the hit library, reducing the starting pool from approximately 4,000 to 2,500 unique frameworks.
+2. <b>Scaffold Simplification</b>: Prior to covalent transformation, I also abstracted the diverse structures into their Bemis-Murcko scaffolds to simplify the hit library, reducing the starting pool from approximately 4000 to 2500 unique frameworks.
 
 3. <b>Quality Control</b>: After enumeration, I verified the presence of the essential imide pharmacophore and filtered out undesired substructures using a modified PAINS list - carefully excluding the phthalimide core and the intended reactive warheads from the 'bad' SMARTS filter.
 </P>
 <p style="text-align: justify;">
-During this process, I leveraged AI agents like <b>Gemini</b> and <b>Claude</b> via <b>Copilot Pro</b> to assist with coding. While these LLMs generated individual RDKit functions with high precision, they struggled with the "big picture" logic required for complex database workflows. Without iterative, human-led direction (through structured markdown protocols and specific prompts), the agents sometimes failed to clean protective groups or generated invalid SMARTS variables. This underscores a current truth for industry-level applications: While LLMs are powerful coding assistants, we still require <b>chemistry-specialised language models</b> to fully automate the digital stage of drug discovery with scientific logic.
+During this process, I leveraged AI agents like <b>Gemini</b> and <b>Claude</b> via my <b>Copilot Pro</b> account to assist with coding. While these LLMs generated individual RDKit functions with high precision, they struggled with the "big picture" logic required for complex database workflows. Without iterative, human-led direction (through structured markdown protocols and specific prompts), the agents sometimes failed to clean protective groups or generated invalid SMARTS variables. This underscores a current truth for industry-level applications: <b>While LLMs are powerful coding assistants, we still require chemistry-specialised language models to fully automate the digital stage of drug discovery with scientific logic</b>.
 </p>
 <p style="text-align: justify;">
 Anyway, this cheminformatics workflow yielded <b>137673 potential covalent CRBN candidates</b> (all with MW < 600 Da). Within this set, 19678 entries contain sulfonyl fluoride or fluorosulfate groups for targeting histidine, while the remainder are designed for cysteine reactivity. <b>With a redundant chemical space at the moment, the next stage is to utilise physics-based refinement to confidently identify high-priority hits.</b>
@@ -127,7 +127,7 @@ Anyway, this cheminformatics workflow yielded <b>137673 potential covalent CRBN 
 
 ## Covalent Docking with Structural Constraints
 <p style="text-align: justify;">
-To screen the ~140,000 candidates generated from our enumeration, I employed molecular docking guided by high-resolution structural data. A query of the <b>RCSB PDB</b> reveals that most available structures represent the <b>"closed" (active) state of CRBN, which is the conformation required for neosubstrate degradation</b>. These include both the isoform 4 (UniProt <b>A4TVL0</b>) and standard human (UniProt <b>Q96SW2</b>) sequences. These structures are essential for prioritising chemical space for covalent modulators, molecular glues, and PROTACs.
+To screen the ~140000 candidates generated from our enumeration, I employed molecular docking guided by high-resolution structural data. A query of the <b>RCSB PDB</b> reveals that most available structures represent the <b>"closed" (active) state of CRBN, which is the conformation required for neosubstrate degradation</b>. These include both the isoform 4 (UniProt <b>A4TVL0</b>) and standard human (UniProt <b>Q96SW2</b>) sequences. These structures are essential for prioritising chemical space for covalent modulators, molecular glues, and PROTACs.
 </p>
 
 ### Ensuring Reliability in Docking Models
@@ -135,11 +135,11 @@ To screen the ~140,000 candidates generated from our enumeration, I employed mol
 For the initial ensemble docking validation, I selected three high-resolution crystal structures of human CRBN in the closed binary state: <b>4TZ4, 5V3O, and 8OJH (Figure 8)</b>. These structures show highly conserved IMiD-binding sites. By aligning these models, I established a consistent set of structural constraints to "lock" the chemical space and ensure our virtual screening remains biologically relevant.
 </p>
 <img src="photos_and_videos/figure_8.png" alt="figure8" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 8</b>. The aligned crystal structures of CRBN-IMiD complex used for ensemble docking with enumurated datebase, which is to enrich covalent binding hits engaging HIS-353.</font><br>
+<font size="2"><b>Figure 8</b>. The aligned crystal structures of CRBN-IMiD complex (4TZ4, 5V3O, and 8OJH) used for ensemble docking with enumurated datebase, which is to enrich covalent binding hits engaging HIS-353.</font><br>
 
 #### Preparing Ligand before Docking
 <p style="text-align: justify;">
-I utilised the flexible sidechain mode of AutoDock4 (AD4) for the covalent docking workflow. This method involves masking the target covalent residue's atom types and charges in the PDBQT grid map, while the ligand-adduct is "anchored" to the protein backbone at the Ca position. To prepare these conjugates, I defined a SMARTS-based transformation to create the ligand-sidechain adduct object in 2D (<b>Figure 9</b>).
+I utilised the flexible sidechain mode of AutoDock4 (AD4) for the covalent docking workflow. This method involves masking the target covalent residue's atom types and charges in the PDBQT grid map, while the ligand-adduct is "anchored" to the protein backbone at the Ca position. To prepare these conjugates, I defined a SMARTS-based transformation to create the object of ligand-sidechain adduct in 2D (<b>Figure 9</b>).
 </p>
 <p style="text-align: justify;">
 Furthermore, I performed a two-step conformer preparation:
@@ -213,11 +213,11 @@ def get_mcs_rmsd(query_sdf_path, ref_sdf_path, aligned_sdf_path, aligned=False, 
 
         return None, None
 ```
-<font size="2"><b>Text 11.</b> The Python function to get RMSD values of MCS (i.e., cyclic imide) from query conformations (e.g., docked) to a reference in SDF format, in order to get the best matched pose for final selection.</font><br>
+<font size="2"><b>Text 11.</b> The Python function to get RMSD values of MCS (cyclic imide herein) from query conformations (e.g., docked) to a reference in SDF format, in order to get the best matched pose for final selection.</font><br>
 
 ### Virtual Screening Results
 <p style="text-align: justify;">
-Following several days of intensive computation locally using the docking strategies described above, I successfully refined the <i>in silico</i> chemical space for covalent CRBN binders and degraders targeting <b>IKZF2</b> and <b>WIZ</b>. The virtual screening for covalent ligands in the binary and <b>IKZF2</b> ternary complexes was relatively straightforward, as two target histidines are in close proximity to the IMiD binding site near the G-loop (<b>Figure 12, rows 2 & 3</b>). In contrast, CYS-11 in the <b>WIZ</b> neosubstrate is more distal from the glutarimide-binding pocket (<b>Figure 12, row 1</b>). This structural gap necessitates "PROTAC-like" bifunctional scaffolds to bridge the distance and ensure effective proximity for covalent engagement.
+Following several days of intensive computation locally using the docking strategies described above, I successfully refined the <i>in silico</i> chemical space for covalent CRBN binders and degraders targeting <b>IKZF2</b> and <b>WIZ</b>. The virtual screening for covalent ligands in the binary and <b>IKZF2</b> ternary complexes was relatively straightforward, as two target histidines are in close proximity to the IMiD binding site near the G-loop (rows 2 & 3, <b>Figure 12</b>). In contrast, CYS-11 in the <b>WIZ</b> neosubstrate is more distal from the glutarimide-binding pocket (row 1, <b>Figure 12</b>). This structural gap necessitates "PROTAC-like" bifunctional scaffolds to bridge the distance and ensure effective proximity for covalent engagement.
 </p>
 <img src="photos_and_videos/figure_12.png" alt="figure12" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 12</b>. Some packing states in ternary complex co-crystal structures available for <b>WIZ</b> (upper row, 8TZX/9DJX) and <b>IKZF2</b> (middle and lower rows, 7U8F/7LPS), showing different proximities needed for developing covalent modalities to stabilise coresponding complexes.</font><br>
@@ -255,13 +255,13 @@ For the IKZF2 covalent MG degraders, I adjusted the thresholds to reflect the in
 
 #### Covalent WIZ Degraders
 <p style="text-align: justify;">
-Targeting CYS-11 in the CRBN-WIZ complex presented a greater challenge - Cysteine residues typically require different warheads than histidine, and as noted, the residue is located further from the binding interface. To focus the library, I calculated the <b>Shortest Bonding Pathlength (SBP)</b>, the number of bonds on the 2D graph from the imide nitrogen to the electrophilic carbon, using a custom RDKit function. I restricted the library to precursors with a SBP >= 13 to ensure the linker was long enough to reach the target residue (<b>Figure 17</b>).
+Targeting CYS-11 in the CRBN-WIZ complex presented a greater challenge - Cysteine residues typically require different warheads than histidine, and as noted, the residue is located further from the binding interface. To focus the library as suggested by Gemini, I calculated the <b>Shortest Bonding Pathlength (SBP)</b>, the number of bonds on the 2D graph from the imide nitrogen to the electrophilic carbon, using a custom RDKit function. I restricted the library to precursors with a SBP >= 13 to ensure the linker was long enough to reach the target residue (<b>Figure 17</b>).
 </p>
 <img src="photos_and_videos/figure_17.png" alt="figure17" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 17</b>. For WIZ covalent degraders, a pre-docking process to focus the library with cysteine dependency. Those candidates with at least 13 SBP were chosen for subsequent covalent additions and ligand preparations.</font>
 <br><br>
 <p style="text-align: justify;">
-Covalent docking against <b>WIZ</b> yielded several promising drug-like hits (<b>Video 18</b>). For this set, I tightened both the docking score (< -12.5 kcal/mol) and nRotB (< 7) to prioritise molecules with high <b>"cooperativity"</b> and low internal strain (<b>Figure 19</b>). Interestingly, the top-scoring candidates predominantly featured cyanamide warheads, with fewer types of Michael acceptor. Many of these "winners" adopted L-shaped conformations, perfectly complementing the CRBN-WIZ interface. Again these designs are attached in my GitHub/HuggingFace repository for any potential development of interest.
+Covalent docking against <b>WIZ</b> yielded several promising drug-like hits (<b>Video 18</b>). For this set, I tightened both the docking score (< -12.5 kcal/mol) and nRotB (< 7) to prioritise PROTAC-like molecules with high <b>"cooperativity"</b> and low internal strain (<b>Figure 19</b>). Interestingly, the top-scoring candidates predominantly featured cyanamide warheads, with fewer types of Michael acceptor. Many of these "winners" adopted L-shaped conformations, perfectly complementing the CRBN-WIZ interface. Again these designs are attached in my GitHub/HuggingFace repository for any potential development of interest.
 </p>
 <video controls>
   <source src="photos_and_videos/video_18.mp4" type="video/mp4">
@@ -287,7 +287,7 @@ For the initial QSAR study, I focused on a <b>classification task</b>. Binary cl
 While chemical identification is frequently used in toxicology to flag hazardous substances, I applied it here to distinguish covalent CRBN candidates using ML. Since I had previously annotated the common covalent warheads (examples in <b>Figure 7</b>), the purpose was to develop a model that captures the "chemist's intuition" — automating the recognition of these specific modalities within the CRBN-binding context.
 </p>
 <p style="text-align: justify;">
-<b>In practical cheminformatics, success often depends on focusing on the specific chemical domain</b>. During data preparation, I initially experimented with including covalent molecules from other Enamine libraries unrelated to CRBN (lower left, <b>Figure 20</b>). However, I found that this "out-of-domain" data acted as just noise - Including positives for general covalency that were negative for CRBN binding confused the model, making it difficult for the machine to extract the specific structural patterns, whether through molecular fingerprints or graph-based matrices, that define the CRBN-covalent space.
+<b>In practical cheminformatics, success often depends on focusing on the specific chemical domain</b>. During data preparation, I initially experimented with including covalent molecules from other Enamine libraries unrelated to CRBN (lower left, <b>Figure 20</b>). However, I found that this "out-of-domain" data just acted as noise - Including positives for general covalency that were negative for CRBN binding confused the model, making it difficult for the machine to extract the specific structural patterns, whether through molecular fingerprints or graph-based matrices, that define the covalent CRBN chemical space.
 </p>
 <p style="text-align: justify;">
 Unless you are pursuing a large-scale <b>transfer learning</b> approach (which would require a massive expansion of the "non-CRBN/non-covalent" negative space as shown in upper left, <b>Figure 20</b>), it is generally more effective to build a lean, focused model. From my personal experience working in the biotech, a model tailored specifically to the drug discovery project at hand is often more accurate and interpretable than a generalised one.
@@ -295,19 +295,19 @@ Unless you are pursuing a large-scale <b>transfer learning</b> approach (which w
 
 #### Classic Machine Learning with SVM and Tree Classifiers
 <p style="text-align: justify;">
-For QSAR classification tasks involving chemical spaces under 10,000 compounds, classical machine learning approaches often provide superior robustness and generalisation. I initiated my study with a <b>Support Vector Machine (SVM)</b> utilising 8,192-bit Morgan fingerprints (radius = 2, chirality ignored) based on preliminary occupancy screening. The screening also confirmed that the majority of "on-bits" originated from the essential imide pharmacophore (<b>Figure 21</b>). This concentration of features is not a problem for SVMs, which rather excel at defining decision boundaries in high-dimensional hyperplanes based on sparse but critical features.
+For QSAR classification tasks involving chemical spaces under 10000 compounds, classical machine learning approaches often provide superior robustness and generalisation. I initiated my study with a <b>Support Vector Machine (SVM)</b> utilising 8192-bit Morgan fingerprints (radius = 2, chirality ignored) based on a preliminary occupancy screening. The screening also confirmed that the majority of "on-bits" originated from the essential imide pharmacophore (<b>Figure 21</b>). This concentration of features is not a problem for SVMs, which rather excel at defining decision boundaries in high-dimensional hyperplanes based on sparse but critical features.
 </p>
 <img src="photos_and_videos/figure_21.png" alt="figure21" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 21</b>. The most common structures of on-bit from CRBN chemical space embedded with Morgan fingerprints (size 8192, radius 2, chirality ignored).</font>
 <br><br>
 <p style="text-align: justify;">
-To ensure true generalisation, I utilised a <b>scaffold-based split</b>, distributing unique Bemis-Murcko scaffolds into training (80%) and testing (20%) sets. This prevents "data leakage" where similar analogs appear in both sets, providing a more rigorous test of the model's predictive power.
+To ensure true generalisation, I utilised a <b>scaffold-based split</b>, distributing unique Bemis-Murcko scaffolds into training (80%, including 20% validation) and testing (20%) sets. This prevents "data leakage" where similar analogs appear in both sets, providing a more rigorous test of the model's predictive power.
 </p>
 <p style="text-align: justify;">
-Following a hyperparameter grid search (optimizing cost, gamma, and kernel type) under 5 fold of cross-validation, the SVM model achieved near-perfect performance on the test set, with both accuracy and the <b>Matthews Correlation Coefficient (MCC)</b> approaching 1.0. The MCC is particularly valuable here as it provides a balanced statistical measure of precision and recall for binary classification. To validate the model's logic, I analysed the top 25 feature importances (top, <b>Figure 22</b>). The results were highly interpretable: the SVM successfully prioritised bits corresponding to sulfonyl fluoride and acrylamide warheads.
+Following a hyperparameter grid search (optimising cost, gamma, and kernel types) under 5 fold of cross-validation, the SVM model achieved near-perfect performance on the test set, with both accuracy and the <b>Matthews Correlation Coefficient (MCC)</b> approaching 1.0. The MCC is particularly valuable here as it provides a balanced statistical measure of precision and recall for binary classification. To validate the model's logic, I analysed the top 25 feature importances (top, <b>Figure 22</b>). The results were highly interpretable: The SVM successfully prioritised bits corresponding to sulfonyl fluoride and acrylamide warheads.
 </p>
 <p style="text-align: justify;">
-I subsequently evaluated two ensemble tree-based models: <b>Random Forest (RF)</b> and <b>eXtreme Gradient Boosting (XGBoost)</b>. After cross-validated tuning of hyperparameters such as maximum tree depth, number of estimators, and feature sub-sampling, both models performed exceptionally. The XGBoost model proved to be the most stable, placing significant weight on cyanamide-related bits within its decision trees (bottom, <b>Figure 22</b>).
+I subsequently evaluated two ensemble tree-based models which often used in my work: <b>Random Forest (RF)</b> and <b>eXtreme Gradient Boosting (XGBoost)</b>. After cross-validated tuning of hyperparameters such as maximum tree depth, number of estimators, and feature sub-sampling etc., both models performed exceptionally. The XGBoost model proved to be the most stable, placing significant weight on cyanamide-related bits within its decision trees (bottom, <b>Figure 22</b>).
 </p>
 <img src="photos_and_videos/figure_22.png" alt="figure22" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 22</b>. The importance plots for top features of Morgan fingerprint respectively interpreted from tuned SVM, RF and XGBoost models, to classify the covalent modality from others in CRBN chemical space.</font>
@@ -317,7 +317,7 @@ Nevertheless, exhaustive grid searches are computationally expensive and time-co
 </p>
 
 ```python
-#Tuning hyperparameters of XGBoost using Optuna based on Bayesian optimization
+#Tuning hyperparameters of XGBoost using Optuna based on Bayesian optimisation
 import optuna
 
 def objective(trial):
@@ -357,21 +357,21 @@ acc_optuna = accuracy_score(y_test, y_pred)
 mcc_optuna = matthews_corrcoef(y_test, y_pred)
 print(f"Optimised XGBoost - Test MCC: {mcc_optuna:.4f} | Test ACC: {acc_optuna:.4f}")
 ```
-<font size="2"><b>Text 23.</b> The Python code to tune hyperparameters of XGBoost classifier with Bayesian optimisation.</font><br>
+<font size="2"><b>Text 23.</b> The Python code to tune hyperparameters of XGBoost classifier with Bayesian optimisation using optuna module.</font><br>
 
 <p style="text-align: justify;">
-This approach reminded me of <b>Markov Chain Monte Carlo (MCMC)</b> methods used for conformational searching in molecular modelling - Both aim to locate global optima (or minima) within a complex landscape without requiring an exhaustive search of all possibilities. As a physical chemist doing interdisciplinary research, this highlights a core principle of data science and engineering I have learnt so far: <b>To find a global optimum, whether in a hyperparameter distribution or a molecular energy landscape, we do not always require <i>ab initio</i> physics for every trial. Instead, the synergy of sufficient high-quality data, fittable empirical paradigms (such as DFT, force-field potentials, or robust mathematical models), and sophisticated statistical methods can navigate us toward the "ground truth" much faster. This encloses a primary goal of AI for Science: Identifying the most efficient approximation that yields a viable solution.</b>
+This approach reminded me of <b>Markov Chain Monte Carlo (MCMC)</b> methods used for conformational searching in molecular modelling - Both aim to locate optima (or minima) within a complex landscape without requiring an exhaustive search of all possibilities. As a physical chemist doing interdisciplinary research, this highlights a core principle of data science and engineering I have learnt so far: <b>To find a global optimum, whether in a hyperparameter distribution or a molecular energy landscape, we do not always require <i>ab initio</i> physics for every trial. Instead, the synergy of sufficient high-quality data, fittable empirical paradigms (such as DFT, force-field potentials, or even just robust mathematical models), and sophisticated statistical methods can navigate us toward the "ground truth" much faster. This encloses a primary goal of AI for Science: Identifying the most efficient approximation that yields a viable solution.</b>
 </p>
 
 #### Classification via Graph Neural Networks (GCN, GAT, and GIN)
 <p style="text-align: justify;">
-To complement the classical ML models, I developed a deep learning pipeline using Graph Neural Networks (GNNs). Following some tutorials from DeepChem, TeachOpenCADD, and Maxime Labonne, I represented each molecule in my library as a graph. Using <b>Thalidomide</b> as an example (<b>Figure 24</b>), the chemical structure is encoded into an adjacency matrix representing bonding connectivities (edges) between atoms (nodes). With DeepChem’s featuriser, I converted these structures into three sub-matrices: <b>node features</b>, <b>edge index</b>, and <b>edge features</b>. For this study, the edge features were dropped because the node features implicitly capture bonding environments and they are updated and aggregated for the awareness of edge type in most standard message-passing algorithms. Furthermore, since we are not predicting bond-specific properties or generating alternative bonds, simplifying the graph to a node-and-edge-index format reduces computational redundancy without sacrificing much accuracy.  
+To complement the classical ML models, I developed a deep learning pipeline using Graph Neural Networks (GNNs). Following some tutorials from DeepChem, TeachOpenCADD, and Maxime Labonne, I represented each molecule in my library as a graph at the beginning. Using <b>Thalidomide</b> as an example (<b>Figure 24</b>), the chemical structure is encoded into an adjacency matrix representing bonding connectivities (edges) between atoms (nodes). With DeepChem’s featuriser, I converted these structures into three sub-matrices: <b>node features</b>, <b>edge index</b>, and <b>edge features</b>. For this study, the edge features were dropped because the node features implicitly capture bonding environments and they would be updated and aggregated for the awareness of edge type in most standard message-passing algorithms as far as I know. Furthermore, since we are not predicting bond-specific properties or generating alternative bonds, simplifying the graph to a node-and-edge-index format reduces computational redundancy without sacrificing much accuracy.  
 </p>
 <img src="photos_and_videos/figure_24.png" alt="figure24" width="480px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 24</b>. The adjacent matrix of Thalidomide as a simply encoded 2D graph, and the actual object featurised by DeepChem module for this study.</font>
 <br><br>
 <p style="text-align: justify;">
-Admittedly, deep learning is often viewed as a "black box" by many computational chemists including myself who was not educated professionally with advanced mathematics. Without a formal background in linear algebra, I used the recent Xmas holiday to familiarise myself with <b>PyTorch</b> and modularise the following workflow based on my coding experience:
+Admittedly, deep learning is often viewed as a "black box" by many computational chemists including myself who was not educated professionally with advanced mathematics. Without a formal background in linear algebra, I used the recent Xmas holiday to familiarise myself with <b>PyTorch</b> and modularise the following workflow based on my software engineering experience and AI proficiency:
 <br><br>
 <b>1. Graph Featurisation, Collate, Scaffold-based Splitting of Training/Validation/Test Sets and Dataloader Preparation in Batch.</b><br>
 <b>2. Epoch-based Training using Backpropagation with the Adam Optimiser and Binary Cross Entropy (BCE) loss for classification.</b><br>
@@ -379,7 +379,7 @@ Admittedly, deep learning is often viewed as a "black box" by many computational
 <b>4. Evaluation using MCC as the primary metric for binary classification performance.</b><br> 
 </p>
 <p style="text-align: justify;">
-I evaluated three distinct architectures: Graph Convolutional Network (GCN), Graph Isomorphism Network (GIN) and Graph Attention Network (GAT) (<b>Text 25</b>). Both GCN and GIN were inspired from TeachOpenCADD tutorial while GAT was proposed by my Gemini agent. While some architectural choices (such as layers and readout functions) might be refined further by a dedicated data scientist, I leaned on a recent industry insight from GSK: <b>In QSAR studies, GNN architecture is often less critical than rigorous hyperparameter optimisation and feature engineering</b> (DOIs in reference). With the deepchem graph featurised from rdkit canonical smiles string (default tautomer but ignoring chirality), I decided to focus on tuning hyperparameters in order to maximise model performance on the classification of CRBN ligand modalities.
+I evaluated three distinct architectures: <b>Graph Convolutional Network (GCN), Graph Isomorphism Network (GIN) and Graph Attention Network (GAT) (Text 25)</b>. Both GCN and GIN were inspired from TeachOpenCADD tutorial while GAT was proposed by my Gemini agent. While some architectural choices (such as layers and readout functions) might be refined further by a dedicated data scientist, I leaned on a recent industry insight from GSK: <b>In QSAR studies, GNN architecture is often less critical than rigorous hyperparameter optimisation and feature engineering</b> (DOIs in reference). With the deepchem graph featurised from RDKit canonical smiles string (default tautomer but ignoring chirality), I decided to focus on tuning hyperparameters in order to maximise model performances on the classification of CRBN ligand modalities.
 </p>
 
 ```python
@@ -532,37 +532,34 @@ class GAT(torch.nn.Module):
 ```
 <font size="2"><b>Text 25.</b> The code for 3 common GNN architectures in PyTorch, which were used for chemical classification based on DeepChem GraphData.</font><br>
 <p style="text-align: justify;">
-As shown in the grid search results (<b>Figure 26</b>), all three GNN models could identify covalent CRBN modulators with exceptional precision and recall (MCC > 0.95). However, the GIN model demonstrated the most robust MCC stability across varying hyperparameters. By utilising Bayesian optimisation, an optimal GIN configuration was more quickly found (Hidden Dim: 16, Batch Size: 16, LR: 0.001) that achieved an MCC of 0.98.</b>
+As shown in the grid search results (<b>Figure 26</b>), all three GNN models could identify covalent CRBN modulators with exceptional precision and recall (MCC > 0.95). Nevertheless, the GIN model demonstrated the most robust MCC stability across varying hyperparameters. By utilising Bayesian optimisation, an optimal GIN configuration was more quickly found (Hidden Dim: 16, Batch Size: 16, LR: 0.001) that achieved an MCC up to 0.98. <b>Obviously both classical ML and GNN approaches proved highly capable of handling this classification task to identify those covalent modalities in the CRBN chemical space. But can these models handle the regression modeling as well?</b>
 </p>
 <img src="photos_and_videos/figure_26.png" alt="figure26" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 26</b>. The hyperparameter screening result for all graph models trained to make binary classification between covalent and non-covalent CRBN binders.</font>
-<br><br>
-<p style="text-align: justify;">
-<b>Both classical ML and GNN approaches proved highly capable of handling this classification task to identify those covalent modalities in the CRBN chemical space. But can these models handle the regression modeling as well?</b>
-</p>
+<font size="2"><b>Figure 26</b>. The hyperparameter screening result for 3 GNN models trained to make binary classification between covalent and non-covalent CRBN binders, evaluated by MCC on test set.</font><br>
 
 ### Regression Task on Electrophilicity
 <p style="text-align: justify;">
-In covalent drug discovery, the estimation of reactivity is a common task for medicinal chemists. With complex biophysical assays, we are able to measure indicators like Kd/ki for binding kinetics in covalent mechanism. Alternatively, the glutathione (GSH) reactivity assay could provide high throughput screening on chemicals targeting a cysteine residue in approximation. For computational chemistry, the reactivity might be even evaluated roughly from ligand electrophilicity through calculating HOMO, LUMO energies and their gaps based on QM approach. Since I have annotated classes of covalent and non-covalent compounds in CRBN chemical space empirically, it would be sensible to check if such label could be characterised and quantified through numerical numbers based on the scientific computation.
+In covalent drug discovery, quantifying reactivity is a primary challenge for medicinal chemists. While biophysical assays can measure kinetic parameters such as k_inact/K_I, high-throughput alternatives like the <b>Glutathione (GSH) reactivity assay</b> provide a proxy for a molecule's propensity to engage cysteine residues. Computationally, this reactivity can be estimated through the lens of frontier molecular orbital (FMO) theory — specifically by calculating <b>HOMO</b> (Highest Occupied Molecular Orbital) and <b>LUMO</b> (Lowest Unoccupied Molecular Orbital) energies. Having previously annotated our CRBN chemical space into covalent and non-covalent classes, I set out to determine if these empirical labels could be characterised and quantified through rigorous electronic descriptors.
 </p>
 
 #### Quantum Chemical Calculations
 <p style="text-align: justify;">
-To calculate molecualr electronic properties reliably within the CRBN chemical space, I instructed my agent for a workflow starting from ETKDG(MMFF) conformational search, xTB geometry optimisations to single-point energy calculations with UMA model as well as Boltzmann averaging on ensembles in vaccum (<b>Figure 27</b>). This is a compromised approach to screen over 10000 hit candidates, considering slow computation speed with MD simulations and DFT calculations but acceptable accuracy with atomic NNP energies and semi-empirical xTB properties based on my previous experience.  
+To calculate molecular electronic properties at scale, I instructed my AI agent to develop a workflow utilising a "conformationally dependent" statistical QM approach. The pipeline begins with <b>ETKDG (MMFF)</b> conformational sampling, followed by <b>xTB</b> geometry optimisation, and culminates in single-point energy calculations using the <b>UMA</b> (Universal Machine Learning Approximation) model. Final properties were derived through <b>Boltzmann averaging</b> over the resulting ensembles in vacuum (<b>Figure 27</b>). This semi-empirical approach serves as a pragmatic compromise for screening over 10000 candidates: It avoids the extreme computational cost of full DFT or MD simulations while maintaining a level of accuracy superior to classic force fields and B3LYP, thanks to the integration of atomic neural network potentials (NNP).
 </p>
 <img src="photos_and_videos/figure_27.png" alt="figure27" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 27</b>. The example to calculate eletrophilic properties (conformationally dependent) for 2 distinct CRBN ligand modalities respectively based on a quick & dirty statistical quantum mechanical workflow.</font>
+<font size="2"><b>Figure 27</b>. The example to calculate some electronic descriptors for 2 distinct CRBN ligand modalities respectively based on a quick statistical quantum chemical computation workflow.</font>
 <br><br>
 <p style="text-align: justify;">
-Comparing HOMO, LUMO and gap energies between the covalent and the non-covalent class of my CRBN chemical space (<b>Figure 28</b>), some statistically significant differences (p < 0.05 in MWU and t-test) could be observed: All covalent species tend to have lower LUMO, higher HOMO and smaller gap values than others. The distribution of xTB-based electrophilicity index is also more significant for the covalent class. 
+A comparison of the electronic profiles between the covalent and non-covalent classes revealed statistically significant differences (p < 0.05 via Mann-Whitney U and t-tests). Covalent species generally exhibited lower LUMO energies, higher HOMO energies, and smaller HOMO-LUMO gaps (<b>Figure 28</b>). Furthermore, the distribution of the electrophilicity index (ω), calculated using the following relationship, was markedly higher for the covalent class:
 </p>
-<img src="photos_and_videos/figure_28.png" alt="figure28" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 28</b>. The distribution of HOMO, LUMO, gap energies and electrophilicty index (&omega;) in covalent and non-covalent classes of CRBN chemical space.</font><br>
 
 $$\omega = \frac{(E_{H} + E_{L})^2}{4(E_{L} - E_{H})}$$
 
+<img src="photos_and_videos/figure_28.png" alt="figure28" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 28</b>. The distribution of HOMO, LUMO, gap energies and electrophilicty index (ω) respectively in covalent and non-covalent classes of CRBN chemical space.</font>
+<br><br>
 <p style="text-align: justify;">
-Nevertheless, these molecular-level QM features are insufficient to classify the covalency confidently in desired chemical space. This was also confirmed by researches from Bayer and Boehringer Ingelheim (DOIs in reference). We might need some further physical calculations associated with the warhead fragment (e.g., atom attribute of Fukui indices in FMO, reaction activation energy with nucleophilic residue etc.) to convince ourself of actual covalency for CRBN-based binder or degrader... Given that LUMO value is more relevant to electrophilicity (i.e., the orbital which accept electrons) and its distribution almost approach Gaussian-type in our chemical space (<b>Figure 28 second</b>), I decided to test some regression models on it.               
+Despite these trends, molecular-level QM features alone are often insufficient for high-confidence classification of covalency - A finding consistent with research from <b>Bayer</b> and <b>Boehringer Ingelheim</b> (DOIs in reference). True predictive power likely requires fragment-specific descriptors, such as <b>Fukui indices</b> on the warhead atoms or calculated <b>transition-state activation energies</b> for the nucleophilic attack. However, because the LUMO energy is the primary orbital for accepting nucleophilic electrons and its distribution in our dataset closely follows a <b>Gaussian</b>-like profile (second plot, <b>Figure 28</b>), I selected it as the target variable for our regression modeling.            
 </p>
 
 #### Benchmarking ML Models for LUMO Prediction
