@@ -564,8 +564,23 @@ Despite these trends, molecular-level QM features alone are often insufficient f
 
 #### Benchmarking ML Models for LUMO Prediction
 <p style="text-align: justify;">
-Herein, the modelling for regression is similar with the previous classification. However, a key difference lies in the loss function - The cross-entropy loss needs to be replaced by the mean squared error (MSE) in order to fit and predict continuous values rather than few categories. Furthermore, since the target label of calculated LUMO energy property was afforded from conformational analysis based on specific stereo-isomer, I included stereochemical features for both 1D molecular fingerprints and 2D graph matrics. This was supposed to reduce blurred noise and increase physical relevance for the model to learn, recognise and weight significant patterns in the prediction of quantum chemical calculation based on 3D conformations.
+The regression modelling workflow followed a similar logic to the previous classification task, with a critical difference in the loss function: <b>Mean Squared Error (MSE)</b> was implemented to fit and predict continuous energy values. Another significant adjustment was made regarding molecular featurisation. Since our target, QM-calculated LUMO energies, is derived from conformational analysis of specific stereoisomers, this time I incorporated <b>stereochemical features</b> into both the 1D Morgan fingerprints and the 2D graph matrices. By including chirality, I aimed to reduce "structural noise" and increase physical relevance, allowing the models to better recognise the subtle patterns that govern 3D-dependent quantum chemical properties. 
 </p>
 <p style="text-align: justify;">
-With the same splitted training and test sets (scaffold-based) as well as comprehensive hyperparameter tunning (Grid search and Bayesian optimisation) as before, all regression modelling performances were compared using SVM, RF, XGBoost, GCN, GAT, GIN archtectures (<b>Table 29</b>). It is interesting to see that, in terms of R2 score (coefficient of determination) on the test, graph models showed no much improvement compared to classic ML models for our small and focused dataset of CRBN chemical space. For example, both SVM and GIN archtectures were modelled and optimised to give relatively strong fit (test R2 up to 0.72) on QM-calculated LUMO energies, though the training time and final model size are much better for GIN thanks to the power of GPU and only the parametric dictionary to be saved with neural network architecture. Besides, the regression model with XGBoost (not RBF kernel) also demonstrated a stable performance with fast training, weak overfitting and light storage for re-usage.
+Using the same scaffold-based train/test split and a combination of Grid Search and Bayesian optimisation, I benchmarked the regression performance across 6 pre-trained and tuned architectures again: <b>SVM, RandomForest, XGBoost, GCN, GAT and GIN (Table 29)</b>.
+</p>
+
+| Regression Models | Molecular Features | Test MSE | Test MAE | Test R2 | Running Time | Model Size |
+| :---: | :---: | :---:| :---: | :---: | :---: | :---: |
+| SVM | Morgan - 8192 bits, 2 radius & include chirality | 0.0408 | 0.1409 | 0.7269 | Slow | .pkl file ~ 600MB  |
+| RandomForest | Morgan - 8192 bits, 2 radius & include chirality | 0.0530 | 0.1613 | 0.6454 | Medium | .pkl file ~ 100MB |
+| XGBoost | Morgan - 8192 bits, 2 radius & include chirality | 0.0414 | 0.1452 | 0.7232 | Fast | .pkl file ~ 500KB |
+| GCN | Graph (exclude edge features) | 0.0497 | 0.1716 | 0.6677 | Fast (GPU) | .pth file < 10KB |
+| GAT | Graph (exclude edge features) | 0.0476 | 0.1656 | 0.6818 | Fast (GPU) | .pth file ~ 12KB |
+| GIN | Graph (exclude edge features) | 0.0409 | 0.1447 | 0.7266 | Fast (GPU) | .pth file ~ 12KB |
+
+<font size="2"><b>Table 29.</b> Benchmark performances across 3 classic ML and 3 GNN models for the prediction of QM-calculated LUMO energies within our CRBN chemical space. (ps. Results are subject to minor stochastic variation based on the random seed)</font><br>  
+
+<p style="text-align: justify;">
+The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.72) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration, and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember the SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
 </p>                           
