@@ -12,13 +12,13 @@ tags:
 
 ## Introduction
 <p style="text-align: justify;">
-In 2025, I published two posts exploring molecular modeling through AI co-folding and physics-based simulations for Structure-Based Drug Discovery (SBDD), drawing on my background in physical organic chemistry and biophysics. However, some pillars of modern computational drug discovery - <b>cheminformatics</b> and <b>machine learning (ML)</b> - have yet to be discussed here. During my time in the industry, these are the fields where I have experienced the most significant professional growth.
+In 2025, I published two posts exploring molecular modeling through AI co-folding and physics-based simulations for Structure-Based Drug Discovery (SBDD), drawing on my background in physical organic chemistry and biophysics. However, some pillars of modern computational drug discovery - <b>Cheminformatics</b> and <b>Machine Learning (ML)</b> - have yet to be discussed here. During my time in the industry, these are the fields where I have experienced the most significant professional growth.
 </p>
 <p style="text-align: justify;">
 In this post, I will share insights from my journey transitioning between the roles of a cheminformatician and an ML engineer within the biotech ecosystem. To demonstrate the real-world application of data science in drug discovery, I will present <b>a virtual screening (VS) workflow targeting the Cereblon (CRBN) chemical space for covalent drug discovery (Figure 1).</b> We will walk through a rigorous pipeline: from chemical database mining and library enumeration to molecular docking, QSAR modelling, and AI-driven generation - all guided by the rational constraints of organic and medicinal chemistry.  
 </p>
 <img src="photos_and_videos/figure_1.png" alt="figure1" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/><br>
-<font size="2"><b>Figure 1.</b> Co-crystal structures of CRBN in complex with IMiD molecular glues. <b>Left:</b> Binary complex (PDB 4TZ4). <b>Center/Right:</b> Ternary complexes with neosubstrates <b>IKZF2</b> (PDB 7U8F) and <b>WIZ</b> (PDB 8TZX), highlighting the structural basis for covalent ligand design with potential warheads.</font><br>
+<font size="2"><b>Figure 1.</b> Co-crystal structures of CRBN in complex with IMiD molecular glues. <b>Left:</b> Binary complex (PDB 4TZ4). <b>Center & Right:</b> Ternary complexes with neosubstrates <b>IKZF2</b> (PDB 7U8F) and <b>WIZ</b> (PDB 8TZX), highlighting the structural basis for covalent ligand design with potential warheads.</font><br>
 
 ## Study Outlines
 
@@ -567,7 +567,7 @@ Despite these trends, molecular-level QM features alone are often insufficient f
 The regression modelling workflow followed a similar logic to the previous classification task, with a critical difference in the loss function: <b>Mean Squared Error (MSE)</b> was implemented to fit and predict continuous energy values. Another significant adjustment was made regarding molecular featurisation. Since our target, QM-calculated LUMO energies, is derived from conformational analysis of specific stereoisomers, this time I incorporated <b>stereochemical features</b> into both the 1D Morgan fingerprints and the 2D graph matrices. By including chirality, I aimed to reduce "structural noise" and increase physical relevance, allowing the models to better recognise the subtle patterns that govern 3D-dependent quantum chemical properties. 
 </p>
 <p style="text-align: justify;">
-Using the same scaffold-based train/test split and a combination of Grid Search and Bayesian optimisation, I benchmarked the regression performance across 6 pre-trained and tuned architectures again: <b>SVM, RandomForest, XGBoost, GCN, GAT and GIN (Table 29)</b>.
+Using the same scaffold-based train/test split and a combination of validated Grid Search and Bayesian optimisation, I benchmarked the regression performance across 6 pre-trained and tuned architectures again: <b>SVM, RandomForest, XGBoost, GCN, GAT and GIN (Table 29)</b>.
 </p>
 
 | Regression Models | Molecular Features | Test MSE | Test MAE | Test R2 | Running Time | Model Size |
@@ -575,12 +575,34 @@ Using the same scaffold-based train/test split and a combination of Grid Search 
 | SVM | Morgan - 8192 bits, 2 radius & include chirality | 0.0408 | 0.1409 | 0.7269 | Slow | .pkl file ~ 600MB  |
 | RandomForest | Morgan - 8192 bits, 2 radius & include chirality | 0.0530 | 0.1613 | 0.6454 | Medium | .pkl file ~ 100MB |
 | XGBoost | Morgan - 8192 bits, 2 radius & include chirality | 0.0414 | 0.1452 | 0.7232 | Fast | .pkl file ~ 500KB |
-| GCN | Graph (exclude edge features) | 0.0497 | 0.1716 | 0.6677 | Fast (GPU) | .pth file < 10KB |
-| GAT | Graph (exclude edge features) | 0.0476 | 0.1656 | 0.6818 | Fast (GPU) | .pth file ~ 12KB |
-| GIN | Graph (exclude edge features) | 0.0409 | 0.1447 | 0.7266 | Fast (GPU) | .pth file ~ 12KB |
+| GCN | Graph (node features + edge index) | 0.0497 | 0.1716 | 0.6677 | Fast (GPU) | .pth file < 10KB |
+| GAT | Graph (node features + edge index) | 0.0476 | 0.1656 | 0.6818 | Fast (GPU) | .pth file ~ 12KB |
+| GIN | Graph (node features + edge index) | 0.0409 | 0.1447 | 0.7266 | Fast (GPU) | .pth file ~ 12KB |
 
-<font size="2"><b>Table 29.</b> Benchmark performances across 3 classic ML and 3 GNN models for the prediction of QM-calculated LUMO energies within our CRBN chemical space. (ps. Results are subject to minor stochastic variation based on the random seed)</font><br>  
+<font size="2"><b>Table 29.</b> Benchmark performances across 3 classic ML and 3 GNN models for the prediction of QM-calculated LUMO energies within our CRBN chemical space. (ps. Results are subject to minor stochastic variation based on the setting of random seed)</font><br>  
 
 <p style="text-align: justify;">
-The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.72) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration, and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember the SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
-</p>                           
+The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.725) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration, and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember the SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
+</p>
+
+## Generative AI Testing
+
+<p style="text-align: justify;">
+With a robust foundation of public data, virtual screening hits, and validated QSAR models as discussed above, I transitioned to the final phase: <b>De Novo Molecular Generation</b>. From the perspective of a computational medicinal chemist, I would seek the answer for two objectives: <b>Could these models further diversify our CRBN chemical space? Are they able to reliably "invent" novel, drug-like covalent candidates?</b>
+</p>
+<p style="text-align: justify;">
+I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures. After some reading (DOIs in reference) and trials with its command line wrappers, I explored 2 primary strategies for targeted generation:
+
+1. <b>Direct Prior Training</b>: Training a "Prior" model exclusively on our curated CRBN chemical space, then sampling from this learned distribution to generate closely related analogs.
+
+2. <b>Available Prior Fine-Tuning</b>: Taking a large, pre-trained Prior (e.g., reinvent model based on the entire ChEMBL database) and fine-tuning it on our focused CRBN dataset to bias the output toward the desired scaffold diversity.
+
+I also implemented the latest REINVENT4 platform from AstraZeneca. While similar to the prior fine-tuning approach of smilesRNN, REINVENT4 offers more sophisticated transfer learning (TL) and reinforcement learning (RL) frameworks. By configuring .toml file in each step, multi-objective scoring functions could be integrated — including SMARTS filters for medicinal chemistry alerts (e.g., PAINS), QED for drug-likeness, and even external QSAR models etc.
+
+3. <b>TL & RL with Scoring</b>: Through transferring knowledge from a large prior to the CRBN-specific space, an appropriate agent was chosen to sample a "neighbouring" chemical space under reasonable constraints of score.
+
+</p>
+
+### Diverse Performances
+
+### Some Covalent CRBN Candidates of Interest
