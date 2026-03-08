@@ -582,27 +582,47 @@ Using the same scaffold-based train/test split and a combination of validated Gr
 <font size="2"><b>Table 29.</b> Benchmark performances across 3 classic ML and 3 GNN models for the prediction of QM-calculated LUMO energies within our CRBN chemical space. (ps. Results are subject to minor stochastic variation based on the setting of random seed)</font><br>  
 
 <p style="text-align: justify;">
-The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.725) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration, and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember the SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
+The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.725) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration (also save RAM compared to classic models using CPU), and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember the SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
 </p>
 
-## Generative AI Testing
+## Testing Generative AI
 
 <p style="text-align: justify;">
 With a robust foundation of public data, virtual screening hits, and validated QSAR models as discussed above, I transitioned to the final phase: <b>De Novo Molecular Generation</b>. From the perspective of a computational medicinal chemist, I would seek the answer for two objectives: <b>Could these models further diversify our CRBN chemical space? Are they able to reliably "invent" novel, drug-like covalent candidates?</b>
 </p>
 <p style="text-align: justify;">
-I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures. After some reading (DOIs in reference) and trials with its command line wrappers, I explored 2 primary strategies for targeted generation:
+I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures and performs targeted generation. After some reading (DOIs in reference) and trials with its command line wrappers, I explored 2 primary strategies:
 
 1. <b>Direct Prior Training</b>: Training a "Prior" model exclusively on our curated CRBN chemical space, then sampling from this learned distribution to generate closely related analogs.
 
 2. <b>Available Prior Fine-Tuning</b>: Taking a large, pre-trained Prior (e.g., reinvent model based on the entire ChEMBL database) and fine-tuning it on our focused CRBN dataset to bias the output toward the desired scaffold diversity.
-
-I also implemented the latest REINVENT4 platform from AstraZeneca. While similar to the prior fine-tuning approach of smilesRNN, REINVENT4 offers more sophisticated transfer learning (TL) and reinforcement learning (RL) frameworks. By configuring .toml file in each step, multi-objective scoring functions could be integrated — including SMARTS filters for medicinal chemistry alerts (e.g., PAINS), QED for drug-likeness, and even external QSAR models etc.
+</b>
+<p style="text-align: justify;">
+I also implemented the latest <b>REINVENT4</b> platform from AstraZeneca. Similar to the prior fine-tuning approach of smilesRNN, REINVENT4 offers more sophisticated transfer learning (TL) and reinforcement learning (RL) frameworks. By configuring .toml file in each step, multi-objective scoring functions could be integrated — including SMARTS filters for medicinal chemistry alerts (e.g., PAINS), QED for drug-likeness, and even external QSAR models etc.
 
 3. <b>TL & RL with Scoring</b>: Through transferring knowledge from a large prior to the CRBN-specific space, an appropriate agent was chosen to sample a "neighbouring" chemical space under reasonable constraints of score.
-
 </p>
+<p style="text-align: justify;">
+A key technical challenge identified by my Gemini agent was that the publicly available REINVENT prior model recognises only 59 tokens from smiles string. This vocabulary excludes stereochemical labels like '@' or explicit hydrogens such as '[H]' - This means our current CRBN dataset must be pre-processed to ensure token compatibility before the generative RL.
+</p>
+<p style="text-align: justify;">
+Meanwhile, in the TL stage for building agent, I utilised a training/validation split and monitored the Negative Log-Likelihood (<b>NLL</b>) as the loss function. The metric of NLL was announced to measures how well the agent model is learning to mimic the specific grammar of our CRBN chemical space (<b>Figure 30</b>). Without any experience on how it would affect the subsequent RL phase, I decided to test 2 cases:
+
+<b>3a.</b> The final agent where all sample loss is optimised to a minimum (<b>step 50</b>)<br>
+<b>3b.</b> The checkpoint agent when the validation loss reached to a stable plateau (<b>step 15</b>), persumably offering better structural diversity before over-fitting to the training set?                   
+</p>
+<img src="photos_and_videos/figure_30.png" alt="figure30" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 30</b>. The loss of Negative Log-Likelihood during transfer learning stage in REINVENT4 according to <I>tensorboard</I> track of log file.</font>
 
 ### Diverse Performances
+<p style="text-align: justify;">
+In <b>Table 31</b>, I summarised some key performances of generative AI constrained by sequential post-processing steps which are necessary for enumerating effective CRBN space based on 6576 initial dataset (basically shown in <b>Figure 20</b>). For the confident identifcation of covalent candidates in pool, both XGBoost and GIN classifiers were re-used here 
 
-### Some Covalent CRBN Candidates of Interest
+| Approach | Generated 'Mols' | Valid Smiles | Fresh Mols | Mols with Imide Substructure | Mols without 'PAINS'  | (Non)-covalent candidates passing both XGBoost and GIN classifiers |
+| :---: | :---: | :---:| :---: | :---: | :---: | :---: |
+| smilesrnn approach 1 | 10000 | 7142 | 6140 | 5899 | 5490 | :---: |
+| smilesrnn approach 2 | 10000 | 9917 | 5050 | 4627 | 4413 | :---: |
+| reinvent4 approach 3a | 30000 | 26028 | 25738 | 3373 | 3121 | :---: |
+| reinvent4 approach 3b | 30000 | 23089 | 22276 | 3188 | 3007 | :---: |
+
+### Some Interesting Covalent CRBN Candidates via AI Generation
