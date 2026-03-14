@@ -24,54 +24,54 @@ In this post, I will share insights from my journey transitioning between the ro
 
 1. <b>Data Inspection & Curation</b> - Analysing the chemical space of CRBN-based binders and degraders using both open-source and commercial databases.
 
-2. <b>Chemical Library Enrichment</b> - Utilising traditional cheminformatics and Quantum Mechanics (QM) approaches to generate synthetic data, specifically addressing regions of insufficient chemical space coverage.
+2. <b>Chemical Library Enrichment</b> - Using traditional cheminformatics and Quantum Mechanics (QM) approaches to generate synthetic data, specifically addressing regions of insufficient chemical space for the coverage of covalent modalities.
 
-3. <b>Physical Validation via VS</b> - Implementing shape-constrained molecular docking to screen large-scale chemical libraries, refining the candidate space based on realistic binding poses and steric complementarity.
+3. <b>Physical Validation for VS</b> - Implementing shape-constrained molecular docking to screen large-scale chemical libraries, refining the candidate space based on realistic binding poses and steric complementarity.
 
-4. <b>QSAR Modelling & Hit Identification</b> - Developing classical ML (e.g., SVM, tree models) and Graph Neural Networks (GNNs) to classify, regress and prioritise chemical spaces of interest (specifically CRBN-based covalent modulators).
+4. <b>QSAR Modelling & Hit Identification</b> - Developing classical ML models (SVM, tree models) and Graph Neural Networks (GNNs) to classify, regress and prioritise the chemical space of interest (CRBN-based covalent modulators).
 
-5. <b>Generative AI & Rational Optimisation</b> - Evaluating industry-standard generative models, including the smilesRNN module from the MorganCThomas/Nxera team and the REINVENT4 Reinforcement Learning (RL) platform developed by AstraZeneca, together with post-processing by alert filtering, descriptor scoring, and transferred QSAR models for the final selection.
+5. <b>Generative AI & Rational Optimisation</b> - Evaluating industry-standard generative models, including the smilesRNN module from the MorganCThomas/Nxera team and the REINVENT4 reinforcement learning platform developed by AstraZeneca, together with post-processing by alert filtering, descriptor scoring, and transferred QSAR models for the final selection in drug design.
 
 ## Chemical Database Search and Processing
 <p style="text-align: justify;">
-The public domain offers a vast array of chemical databases — including <b>PubChem</b>, <b>ChEMBL</b>, <b>ZINC</b>, and <b>Enamine</b> — each serving distinct research purposes. As a computational medicinal chemist supporting Targeted Protein Degradation (TPD) pipelines actively, I have found <b>BindingDB</b> and <b>MolecularGlueDB</b> particularly effective for capturing academic datasets.
+The public domain offers a vast array of chemical databases — including <b>PubChem</b>, <b>ChEMBL</b>, <b>ZINC</b>, and <b>Enamine</b> — each serving distinct research purposes. As a computational medicinal chemist actively supporting Targeted Protein Degradation (TPD) pipelines, I have found <b>BindingDB</b> and <b>MolecularGlueDB</b> particularly effective for capturing academic datasets.
 </p>
 <p style="text-align: justify;">
-In an industrial setting, we also place a high premium on the latest competitive intelligence, often found in patent literature. Extracting, annotating, and structuralising this "dark data" requires significant effort... Fortunately, AI-powered tools like <b>DECIMER</b> (used later in this workflow) have streamlined the translation of chemical images into machine-readable formats. Furthermore, efficient drug design necessitates libraries built upon synthetically feasible building blocks. Suppliers like Enamine provide categorised catalogs that allow us to tailor our search criteria to the specific synthetic constraints of a project.
+In an industrial setting, we also place a high premium on the latest competitive intelligence, often found in <b>patent literature</b>. Extracting, annotating, and structuralising this "dark data" requires significant effort... Fortunately, AI-powered tools like <b>DECIMER</b> (used later in this workflow) have streamlined the translation of chemical images into machine-readable formats. Furthermore, efficient drug design necessitates libraries built upon synthetically feasible building blocks. Chemical suppliers such as Enamine provide some useful catalogs that allow us to tailor our search criteria to the specific synthetic constraints of a project.
 </p>
 <p style="text-align: justify;">
-While sourcing data is foundational, the engineering approach used to process it is often the differentiator in a project's success. For professional cheminformatics workflows, I prefer <b>KNIME</b> as learnt during the work. This GUI-based platform is exceptionally powerful for manipulating and visualising tabular data (such as CSV or SD files) through sequential nodes. Honestly KNIME has saved me countless hours typically spent on boilerplate data engineering with Python (using RDKit, Pandas, and NumPy modules). While LLM-driven AI agents are evolving, I remain cautious about fully delegating these tasks to them. I believe data processing in chemistry still requires deep domain expertise and the ability to perform real-time monitoring and debugging to ensure structural integrity.
+While sourcing data is foundational, the engineering approach used to process them is often the differentiator in a project's success. For professional cheminformatics workflows, I prefer <b>KNIME</b> pipeline as learnt on the job. This GUI-based platform is exceptionally powerful for manipulating and visualising tabular data (such as CSV or SD files with chemical structure) through sequential nodes. Honestly KNIME has saved me countless hours typically spent on boilerplate data engineering with Python (including RDKit, Pandas, and NumPy modules). While LLM-driven AI agents are evolving, I remain cautious about fully delegating these tasks to them. I believe data processing in chemistry still needs deep domain expertise and human-level ability to perform real-time monitoring and debugging, which also ensure integrity and accountability as required in industry.
 </p>
 
-### Open-Source Curation and Data Imbalance
+### Open-source Curation and Data Imbalance
 <p style="text-align: justify;">
-<b>Figure 2</b> illustrates the KNIME workflow I developed to aggregate and process CRBN chemical space data from BindingDB and MolecularGlueDB. Beyond generating the final dataset in SDF format, the pipeline extracts available PDB structural metadata for downstream structural analysis. To assess the chemical diversity, I employed <b>t-distributed Stochastic Neighbor Embedding (t-SNE)</b>, a dimensionality reduction technique used here to project the chemical space based on molecular fingerprints and <b>Tanimoto similarity</b>.
+<b>Figure 2</b> illustrates the KNIME workflow I developed to aggregate and process CRBN chemical space data from BindingDB and MolecularGlueDB. Beyond generating the final dataset in SDF format, the pipeline extracts available PDB structural metadata for downstream structural analysis. To assess the chemical diversity, I employed <b>t-distributed Stochastic Neighbor Embedding (t-SNE)</b>, a dimensionality reduction technique used here to project the chemical space based on <b>molecular fingerprints</b> and <b>Tanimoto similarity</b>.
 </p>
 <img src="photos_and_videos/figure_2.png" alt="figure2" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 2</b>. The KNIME pipeline to integrate two chemical database, check specific labelled information and visualise the chemical space on t-SNE plot.</font>
 <br><br>
 <p style="text-align: justify;">
-Since high-molecular-weight PROTACs were filtered out, the remaining dataset consists of a few hundred small-molecule CRBN binders and glues. Given this relatively small scale, I utilised 1024-bit <b>Morgan fingerprints</b> (radius = 2, chirality ignored) without significant concern for bit collisions. The most labor-intensive phase, however, remains the manual classification of "active" versus "inactive" sets. This requires a detailed review of diverse data sources, varying biophysical or cellular assay conditions, and thresholding — all of which demand cautious, expert-led curation. As shown in <b>Figure 3</b>, a major challenge emerged: an overwhelming prevalence of "active" compounds relative to "inactive" labels. This reflects a pervasive <b>publication bias</b> in open databases, where academic research naturally prioritises and reports successful positive results.
+Since high-molecular-weight PROTACs (> 600 Da) were filtered out, the remaining dataset consists of a few hundred small-molecule CRBN binders and glues. Given this relatively small scale, I utilised 1024-bit <b>Morgan fingerprints</b> (radius = 2, chirality ignored) without significant concern for bit collisions. The most labor-intensive step, however, remains the manual classification of "active" versus "inactive" sets. This requires a detailed review of diverse data sources, varying biophysical or cellular assay conditions, and vague thresholding (e.g., **) — all of which demand cautious, expert-led curation. As shown in <b>Figure 3</b>, there is a major challenge obviously: An overwhelming prevalence of "active" compounds relative to "inactive" labels. This reflects the <b>publication bias</b> in open databases, where academic research naturally prioritises and reports successful positive results.
 </p>
 <img src="photos_and_videos/figure_3.png" alt="figure3" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 3</b>. The t-SNE plot showing imbalanced data distribution between active and inactive CRBN chemical sets that against the need for ML/QSAR analysis properly.</font>
 <br><br>
 <p style="text-align: justify;">
-In an industrial setting, the situation is usually opposed. In the <b>Design-Make-Test-Analyze (DMTA)</b> cycle, we typically generate far more negative data than positive hits. Relying solely on these limited and imbalanced public datasets for QSAR modeling is often not productive. To build a robust predictive model, we must look beyond these biased activity labels and seek opportunities in broader, unlabelled chemical libraries or through data augmentation.
+In industry, the situation is usually opposed. In the <b>Design-Make-Test-Analyze (DMTA)</b> cycle, we typically generate far more negative data than positive hits. Relying solely on these limited and imbalanced public datasets for QSAR modeling is often not productive. To build a robust predictive model, we must look beyond these biased activity labels and seek opportunities in broader, unlabelled chemical libraries or through data augmentation.
 </p>
 
 ### Commercial Database & Cheminformatics Analysis 
 <p style="text-align: justify;">
-Recently, Enamine released several targeted libraries focused on CRBN molecular glues. These datasets are highly informative and chemically diverse, spanning a range of scaffolds from <b>classic IMiDs</b> to newer derivatives such as Phenyl Amino Glutarimides (<b>PAG</b>), Phenyl Dihydrouracils (<b>PD</b>), Phenyl Glutarimides (<b>PG</b>), Acylated Amino Glutarimides (<b>AAG</b>), and Avadomide.
+Recently, Enamine released several targeted libraries focused on CRBN molecular glues (the link in reference). I found these datasets are highly informative and chemically diverse, spanning a range of scaffolds from <b>classic IMiDs</b> to newer derivatives such as Phenyl Amino Glutarimides (<b>PAG</b>), Phenyl Dihydrouracils (<b>PD</b>), Phenyl Glutarimides (<b>PG</b>), Acylated Amino Glutarimides (<b>AAG</b>), and Avadomide.
 </p>
 <p style="text-align: justify;">
-Using a custom KNIME workflow (<b>Figure 4, upper</b>), I analysed this chemical space at multiple levels. At the molecular level, the dataset contains over 3,000 unique canonical SMILES strings (processed by stripping stereochemical tokens like '@' for simplified initial analysis). As expected, the vast majority of these molecules contain <b>at least one cyclic imide substructure</b>, acting as the essential pharmacophore for CRBN binding (<b>Figure 4, lower</b>).
+Using a custom KNIME workflow (<b>Figure 4, upper</b>), I analysed this chemical space at multiple levels. At the molecular level, the dataset contains over 3,000 unique canonical SMILES strings (processed by stripping stereochemical tokens like '@' to simplify initial analysis). As expected, the vast majority of these molecules contain <b>at least one cyclic imide substructure</b>, acting as the essential pharmacophore for CRBN binding (<b>Figure 4, lower</b>).
 </p>
 <p style="text-align: justify;">
-However, raw t-SNE visualisations at the molecular level can appear "fuzzy" due to the high density of similar or near-duplicate analogs — a problem that alternative algorithms like UMAP also struggled to resolve. To achieve a more distinct and interpretable visualisation, I abstracted the molecules to their <b>Bemis-Murcko scaffolds</b> (retaining only the union of ring systems and linkers) and performed <b>Maximum Common Substructure (MCS)</b> decomposition.
+However, raw t-SNE visualisations at the molecular level can appear "fuzzy" due to the high density of similar scaffolds or near-duplicate analogs — a problem that alternative algorithms like UMAP also struggled to resolve. To achieve a more distinct and interpretable visualisation, I abstracted the molecules to their <b>Bemis-Murcko scaffolds</b> (retaining only the union of ring systems and linkers) and performed <b>Maximum Common Substructure (MCS)</b> decomposition.
 </p>
 <p style="text-align: justify;">
-This hierarchical mapping revealed that while the majority of core scaffolds are rooted in the IMiD class, the merged dataset successfully captures modern chemical matter. For instance, cores 10 and 21 respectively represent the more recently developed PAG and PG scaffolds. This structural decomposition allows us to better navigate the diversity of the library and identify gaps for potential expansion.
+This hierarchical mapping revealed that while the majority of core scaffolds are rooted in the IMiD class, the merged dataset successfully captures modern chemical matters. For instance, cores 10 and 21 respectively represent the more recently developed PAG and PG scaffolds (<b>Figure 4, lower</b>). This structural decomposition allows us to better navigate the diversity of the library and identify gaps for potential expansion.
 </p>
 <img src="photos_and_videos/figure_4a.png" alt="figure4a" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/><br>
 <img src="photos_and_videos/figure_4b.png" alt="figure4b" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
@@ -79,19 +79,19 @@ This hierarchical mapping revealed that while the majority of core scaffolds are
 
 ### Addressing the Covalent Modality Gap
 <p style="text-align: justify;">
-By merging the curated public data with the Enamine dataset, I was able to significantly enrich the available chemical space (<b>Figure 5</b>). There is minimal overlap between the two: This is likely because commercial suppliers prioritise novel, synthetically accessible analogs rather than simply replicating previously reported active substances. Despite this expansion, a critical gap remains: <b>Covalent CRBN binders and their corresponding degraders are still under-represented, accounting for only ~150 entries out of the 4500 records in the final library.</b>
+By merging the curated public dataset with the Enamine library, I was able to significantly enrich the available chemical space (<b>Figure 5</b>). There is minimal overlap between the two: This is likely because commercial suppliers prioritise novel, synthetically accessible analogs rather than simply replicating previously reported active substances. Despite this expansion, a critical gap remains: <b>Covalent CRBN binders and their corresponding degraders are still under-represented, accounting for only ~150 entries out of the 4500 records in the final library.</b>
 </p>
 <img src="photos_and_videos/figure_5.png" alt="figure5" width="720px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 5</b>. Two t-SNE maps showing the limited chemical space of covalent CRBN binders available from public and Enamine databases.</font>
 <br><br>
 <p style="text-align: justify;">
-To address this sparsity, I conducted a targeted literature and patent search, focusing on recent works from the <b>Lyn Jones group</b> in Dana-Farber (DOIs in reference) and a recent <b>C4 Therapeutics</b> patent (<b>WO2025/096856A1</b>). This yielded approximately 30 additional covalent CRBN binders not present in the initial databases (<b>Figure 6</b>). Based on the reported mechanism, most of these ligands function as reversible-covalent binders that target <b>HIS-353</b> through a <b>sulfonyl fluoride</b> warhead (as shown in left, <b>Figure 1</b>).
+To address this sparsity, I conducted a targeted literature and patent search, focusing on recent works from the <b>Lyn Jones group</b> in Dana-Farber (the DOI in reference) and a recent <b>C4 Therapeutics</b> patent (WO2025/096856A1). This yielded approximately 30 additional covalent CRBN binders not present in the initial databases (<b>Figure 6</b>). Based on the reported mechanism, most of these ligands function as reversible-covalent binders that target <b>HIS-353</b> through a <b>sulfonyl fluoride</b> warhead (as shown in the left, <b>Figure 1</b>).
 </p>
 <img src="photos_and_videos/figure_6.png" alt="figure6" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 6</b>. The structure of some novel CRBN binders based on the covalency with HIS-353, extracted from recent journals and patents by AI tool <i>DECIMER</i>.</font>
 <br><br>
 <p style="text-align: justify;">
-From my perspective as an industrial drug designer, the potential for covalent modalities in CRBN-dependent degradation is far broader than what is currently documented. Recent structural data and pipelines from <b>AstraZeneca, BMS, MonteRosa, and Novartis</b> suggest several untapped opportunities. For instance:
+From my perspective as drug designer in TPD industry, the potential for covalent modalities in CRBN-dependent degradation is far broader than what is currently documented. Recent structural data and pipelines from <b>AstraZeneca</b>, <b>BMS</b>, <b>MonteRosa</b> and <b>Novartis</b> suggest several untapped opportunities:
 
 1. The <b>IKZF2</b> neosubstrate features a <b>HIS-6</b> residue on its $\beta$-sheet near the G-loop (middle, <b>Figure 1</b>).
 2. The <b>WIZ</b> neosubstrate also contains a <b>CYS-11</b> residue positioned near the IMiD-binding pocket on CRBN (right, <b>Figure 1</b>).
@@ -591,38 +591,128 @@ The results highlight an interesting trend: For our focused CRBN dataset, the gr
 With a robust foundation of public data, virtual screening hits, and validated QSAR models as discussed above, I transitioned to the final phase: <b>De Novo Molecular Generation</b>. From the perspective of a computational medicinal chemist, I would seek the answer for two objectives: <b>Could these models further diversify our CRBN chemical space? Are they able to reliably "invent" novel, drug-like covalent candidates?</b>
 </p>
 <p style="text-align: justify;">
-I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures and performs targeted generation. After some reading (DOIs in reference) and trials with its command line wrappers, I explored 2 primary strategies:
+I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures and performs targeted generation. After some reading (DOIs in reference) and trials with command line wrapper, I explored 2 primary strategies:
 
 1. <b>Direct Prior Training</b>: Training a "Prior" model exclusively on our curated CRBN chemical space, then sampling from this learned distribution to generate closely related analogs.
 
-2. <b>Available Prior Fine-Tuning</b>: Taking a large, pre-trained Prior (e.g., reinvent model based on the entire ChEMBL database) and fine-tuning it on our focused CRBN dataset to bias the output toward the desired scaffold diversity.
+2. <b>Available Prior Fine-Tuning</b>: Taking a large, pre-trained prior (e.g., reinvent model based on the entire ChEMBL database) and fine-tuning it on our focused CRBN dataset to bias the output toward the desired scaffold diversity.
 </b>
 <p style="text-align: justify;">
-I also implemented the latest <b>REINVENT4</b> platform from AstraZeneca. Similar to the prior fine-tuning approach of smilesRNN, REINVENT4 offers more sophisticated transfer learning (TL) and reinforcement learning (RL) frameworks. By configuring .toml file in each step, multi-objective scoring functions could be integrated — including SMARTS filters for medicinal chemistry alerts (e.g., PAINS), QED for drug-likeness, and even external QSAR models etc.
+I also implemented the latest <b>REINVENT4</b> platform from AstraZeneca. Similar to the prior fine-tuning approach of <b>smilesRNN</b>, it offers more sophisticated transfer learning (TL) and reinforcement learning (RL) frameworks. By configuring .toml file in each step, multi-objective scoring functions could be integrated — including SMARTS filters for medicinal chemistry alerts (e.g., PAINS), QED for drug-likeness, and even external QSAR models etc.
 
 3. <b>TL & RL with Scoring</b>: Through transferring knowledge from a large prior to the CRBN-specific space, an appropriate agent was chosen to sample a "neighbouring" chemical space under reasonable constraints of score.
 </p>
 <p style="text-align: justify;">
-A key technical challenge identified by my Gemini agent was that the publicly available REINVENT prior model recognises only 59 tokens from smiles string. This vocabulary excludes stereochemical labels like '@' or explicit hydrogens such as '[H]' - This means our current CRBN dataset must be pre-processed to ensure token compatibility before the generative RL.
+A key technical challenge identified by my Gemini agent was that the publicly available reinvent prior model recognises only 59 tokens from smiles string. This vocabulary excludes stereochemical labels like '@' or explicit hydrogens such as '[H]' - This means our current CRBN dataset must be pre-processed to ensure token compatibility before the generative RL.
 </p>
 <p style="text-align: justify;">
-Meanwhile, in the TL stage for building agent, I utilised a training/validation split and monitored the Negative Log-Likelihood (<b>NLL</b>) as the loss function. The metric of NLL was announced to measures how well the agent model is learning to mimic the specific grammar of our CRBN chemical space (<b>Figure 30</b>). Without any experience on how it would affect the subsequent RL phase, I decided to test 2 cases:
+Meanwhile, in the TL stage for building agent, I utilised a training/validation split and monitored the Negative Log-Likelihood (<b>NLL</b>) as the loss function. The metric of NLL was announced to evaluate how well the agent model is learning to mimic the specific grammar of our CRBN chemical space (<b>Figure 30</b>). Without any experience on how it would affect the subsequent RL phase, I decided to test two specific cases in <b>REINVENT4</b>:
 
-<b>3a.</b> The final agent where all sample loss is optimised to a minimum (<b>step 50</b>)<br>
-<b>3b.</b> The checkpoint agent when the validation loss reached to a stable plateau (<b>step 15</b>), persumably offering better structural diversity before over-fitting to the training set?                   
+<b>a.</b> The final agent where all sample loss is optimised to a minimum (<b>step 50</b>)<br>
+<b>b.</b> The checkpoint agent when the validation loss reached to a stable plateau (<b>step 15</b>) - persumably offering better structural diversity before over-fitting to the training set?                   
 </p>
 <img src="photos_and_videos/figure_30.png" alt="figure30" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
-<font size="2"><b>Figure 30</b>. The loss of Negative Log-Likelihood during transfer learning stage in REINVENT4 according to <I>tensorboard</I> track of log file.</font>
+<font size="2"><b>Figure 30</b>. The loss of Negative Log-Likelihood during transfer learning stage in REINVENT4 according to a track panel in <I>tensorboard</I>.</font>
 
-### Diverse Performances
+### Comparative Performance and Scaffold Diversity
 <p style="text-align: justify;">
-In <b>Table 31</b>, I summarised some key performances of generative AI constrained by sequential post-processing steps which are necessary for enumerating effective CRBN space based on 6576 initial dataset (basically shown in <b>Figure 20</b>). For the confident identifcation of covalent candidates in pool, both XGBoost and GIN classifiers were re-used here 
+<b>Table 31</b> summarises the generative capacity of each approach, constrained by my tailored hierarchical post-processing pipeline for enumerating CRBN chemical space effectively. To ensure a high confidence in the identification of covalency, I employed a dual-classifier consensus: Only molecules flagged as positives/negatives by both of my <b>XGBoost</b> and <b>GIN</b> models were prioritised - This multi-model validation was found to significantly reduces artifacts in determining the modality of structure.
+</p>
 
-| Approach | Generated 'Mols' | Valid Smiles | Fresh Mols | Mols with Imide Substructure | Mols without 'PAINS'  | (Non)-covalent candidates passing both XGBoost and GIN classifiers |
-| :---: | :---: | :---:| :---: | :---: | :---: | :---: |
-| smilesrnn approach 1 | 10000 | 7142 | 6140 | 5899 | 5490 | :---: |
-| smilesrnn approach 2 | 10000 | 9917 | 5050 | 4627 | 4413 | :---: |
-| reinvent4 approach 3a | 30000 | 26028 | 25738 | 3373 | 3121 | :---: |
-| reinvent4 approach 3b | 30000 | 23089 | 22276 | 3188 | 3007 | :---: |
+| Approach | Targeted 'Mols' | Valid Smiles | Novel Mols | Mols with Imide Substructure | Mols without 'PAINS'  | Mols QED > 0.5 | Non/Covalent Candidates Passing both XGBoost & GIN Classifiers together |
+| :---: | :---: | :---:| :---: | :---: | :---: | :---: | :---: |
+| smilesrnn approach 1 | 10000 | 7142 | 6140 | 5899 | 5490 | 5181 | 3910/1171 |
+| smilesrnn approach 2 | 10000 | 9917 | 5050 | 4627 | 4413 | 4090 | 3048/1006 |
+| reinvent4 approach 3a | 30000 | 23089 | 22276 | 3188 | 3007 | 2861 | 2489/343 |
+| reinvent4 approach 3b | 30000 | 26028 | 25738 | 3373 | 3121 | 2951 | 2582/329 |
 
-### Some Interesting Covalent CRBN Candidates via AI Generation
+<font size="2"><b>Table 31.</b> Post-processing and analysis on different AI model capacities of generating potential candidates for CRBN chemical space.</font><br>
+<p style="text-align: justify;">
+Here are my observations and assumptions from the test above:
+
+1. <b>Distribution Fidelity</b>: Both smilesRNN approaches (Direct Prior and Fine-Tuning) showed high fidelity to the training set. For example, the ratio of generated non-covalent to covalent candidates (3~4:1) closely mirrors the original distribution, suggesting these models might be suitable for SAR exploitation tasks (such as hit expansion or lead optimisation).
+
+2. <b>Scaffold Innovation</b>: REINVENT4 demonstrated a significant 'drop-off' during my check with imide pharmacophore. While this results in lower efficiency to generate 'secure' hits, it indicates a higher tendency for <i>de novo</i> innovation. More bioisosteres or alternative cores could be explored for new ideas that deviate from the imide-heavy bias based on training set.
+
+3. <b>Access to Drug-likeness</b>: All protocols are able to produce some high-quality candidates (QED > 0.5 and no undesired alert) for potential drug development in spite of ignored stereochemistry. I think <b>smilesRNN</b> is more user friendly without the need to supply explicit reward functions as configured in .toml file of <b>REINVENT4</b>.
+
+</p>
+<p style="text-align: justify;">
+To check the final selected space in detail, some t-SNE plots were projected from two perspectives - class of covalency and source of datasets (<b>Figure 32</b>). Through the filtration, all generated models effectively enrich our CRBN chemical space. Different from <b>smilesRNN</b> where analogs were mainly filled around existing clusters, <b>REINVENT4</b> created a plenty of candidates in sparse regions (upper right) especially for noncovalent class. Interactive investigation of structures in KNIME revealed that <b>REINVENT4</b> preferentially explore the space of 'suspicious molecular glues' with <b>Phenyl Dihydrouracil (PD)</b> and <b>Phenyl 3-substituted-Glutarimide (P3G)</b> which rarely exist in our training set. I assume this is due to the addition of penalty weight on stereo-centres in reward functions which reduce the generation of chiral cores such as <b>Phenyl 2-substituted-Glutarimide (P2G)</b> in RL process.  
+</p>
+<img src="photos_and_videos/figure_32.png" alt="figure32" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 32</b>. A series of t-SNE plots based on the Morgan fingerprints (size 8192, radius 2, chirality ignored) showing the variation of CRBN chemical space from training set to post-processed generated set respectively.</font>
+
+### Prioritising AI-generated CRBN Covalent Candidates via Property-based Optimisation
+<p style="text-align: justify;">
+With a large pool of AI-generated structures even after post-processing, the next challenge is prioritisation. While physics-based structural modelling (including docking, MD and even FEP workflows) is a standard procedure as I demonstrated earlier and in previous blog, it becomes a bottleneck when dealing with many novel scaffolds generated by AI - There is a plenty of structures (e.g., warhead tautomers) that are hard to be prepared with a set of sidechain transformations before the covalent docking. Even with some positively docked structures, further MD simulation of covalent modalities also require complex force-field parameterisation which are time-consuming against the essence of screening.    
+</p>
+<p style="text-align: justify;">
+Based on my industrial CADD experience, when SBDD is impracticable, the property-based optimisation strategy become an alternative choice in LBDD. For this case of discovering covalent CRBN modulators, I believe binding affinity, reactive kinetics, potency and efficacy are only half the battle; Physicochemical, ADME, and DPMK properties are equally critical for ensuring that a molecule can reach its target <i>in vivo</i>.
+</p>
+<p style="text-align: justify;">
+For the large-scale virtual screening, I think <b>three molecular descriptors</b> are highly indicative to guide above performances at late stage:
+
+1. <b>logP (Logarithm of the Partition coefficient)</b> - Its ideal range is likely between 1.0 and 3.5 for the desired <b>lipophilicity</b> (logD if pH considered). Using <b>RDKit’s fragment-based calculation</b> is a robust baseline for this domain. 
+
+2. <b>TPSA (Topological Polar Surface Area)</b> - As a proxy for <b>permeability and oral bioavailability</b>, I monitored TPSA with an upper threshold of 130 Å². While such <b>2D-based</b> value is a "quick and dirty" metric, it remains a gold standard for initial prioritisation in molecular glue and PROTAC design.     
+
+3. <b>logS (Logarithm of Water Solubility)</b> - I aimed for the value above -4.0 to have <b>sufficient distribution in aqueous environment</b>. For corresponding calculation, I prefer to use <b>ESOL approach</b> (Estimated SOLubility) - A reliable linear regression model based on clogP, MW, nRotB and Aromatic proportion features, as established by Delaney and refined by Pat Walters.
+</p>
+<p style="text-align: justify;">
+As shown in the distribution analysis (<b>Figure 33</b>), the majority of our generated candidates after post-processing fall within these desired physicochemical regions. Interestingly, <b>smilesRNN</b> (especially without a global prior) tended to generate more polar, hydrophilic molecules that closely matched the training set's local distribution. In contrast, <b>REINVENT4</b> explored a more narrow range of lipophilic "sweet spot".
+</p>
+<img src="photos_and_videos/figure_33.png" alt="figure33" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
+<font size="2"><b>Figure 33</b>. The distribution of calculated logP, TPSA and logS descriptors respectively for our training set and all generated datasets following filtration.</font>
+<br><br>
+<p style="text-align: justify;">
+To visualise some of novel covalent products meeting all three criteria, I used the <b>mols2grid</b> module to list AI-generated candidates that passed the <b>dual-classifier check</b> (XGBoost+GIN) and maintained <b>high drug-likeness</b> (QED > 0.67). The resulting 82 final structures (<b>Video 34</b>) represent a highly diverse chemical space including:
+
+* <b>Novel PD-based CRBN molecular glues</b>
+* <b>Imide in 7-membered rings</b> (albeit with one exception of open imide at first)
+* <b>All sets of reactive warhead as expected</b>
+
+<p style="text-align: justify;">
+I believe this AI-enhanced chemical space derived from open cheminformatic docking dataset, combined with my rational supervision through property-based optimisation strategy, has yielded a rich pipeline of covalent CRBN-binding candidates ready for experimental validation.
+</p>
+<video controls>
+  <source src="photos_and_videos/video_34.mp4" type="video/mp4">
+</video>
+<font size="2"><b>Video 34</b>. The monitored generative AI product of some drug-like candidates in covalent CRBN chemical space, as shown by mols2grid module with RDKit-calculated properties.</font>
+<br><br>
+
+## Summary and Outlook
+<p style="text-align: justify;">
+In this blog, I explored the CRBN chemical space with a focus on sparse covalent modalities. It highlights <b>the powerful synergy between classical computational chemistry/cheminformatics and modern AI workflows</b>. By moving from comprehensive data curation and into the physics/ML-integrated drug design, we have transformed raw, imbalanced, unlabelled public datasets to productive libraries refined for drug discovery and development practically. I think there are some key takeaways from this blog:
+
+1. <b>We must addrees the bias when deal with any dataset in the public.</b> It would be benefitial to enrich the chemical space with <b>speciallised libraries</b> and <b>patent mining</b> correspondingly. With human-level cheminformatic skills, this enabled me to design and develop potential candidate pool targeting covalent residues in TPD field.
+
+2. <b>Virtual screening is more than simply doing the docking.</b> By implementing <b>pharmacophore shape constraints</b> and <b>Shortest Bonding Pathlength (SBP) filters</b>, I ensured that our covalent "inventions" were target-focused and structurally plausible within CRBN and interfaces for IKZF2 and WIZ.
+
+3. For structural identification and regressive analysis, <b>satisfactory approximation, generalisation and automation could be achieved by most fine-tuned ML models based on well-distributed data</b>. The QSAR modelling in my study domain is not very sensitive to feature type or architecture choice, no matter it is classic fingerprint tree or graph neural network... I believe both <b>data quality</b> by annotation or QM and <b>model deployability</b> in engineering are overlooked factors to consider for drug discovery industry.
+
+4. From my perspective as application scientist, <b>AI molecular generation with RL represents a promising future direction</b> that now established on appropriate data/prior of available chemical space together with the agent rewarded by desired metrics. For our computational drug designers at the moment, it is still necessary to keep monitoring these generative progress with <b>a human mindset of biological targets as well as physicochemical, ADME, and DPMK properties</b>.
+</p>
+
+## Data and Code Availability
+
+[Hao Lan's Github Repository](https://github.com/HaoLan-compchem/blog_15_03_2026)
+
+[Hao Lan's HuggingFace Storage](https://)
+
+## Reference and Acknowledgement
+
+[Enamine](https://https://enamine.net/compound-libraries/molecular-glues) link for molecular glues librarys
+
+[DOI](https://pubs.rsc.org/en/content/articlepdf/2022/cb/d2cb00078d) for the research of covalent Cereblon modulators published by Lyn Jones group
+
+
+
+## Disclaimer
+<p style="text-align: justify;">
+The entirety of the content, methodologies, analyses, and conclusions presented in this personal blog post are solely the contribution of myself as the author, and are based exclusively on open-source, non-commercial-use software and publicly available data. This work is intended purely for academic and educational use and is not related to, reflective of, or affiliated with the work, practices, or proprietary information of any of my current or previous employers.
+</p>
+
+## Additional Note
+<p style="text-align: justify;">
+Due to few unforeseen events in my career and family, I would pause the update for this series of technical blog for a period of time. Meanwhile, there are some emerging matters I need to prioritise sooner rather than later - gain professional knowledge in ADME and DMPK, practice communication for CADD technical leadership and software product management in industry, stick at body maintenance for longer-lasting health and the next generation etc... all of which are becoming even more important nowadays in a world with agentic AI.               
