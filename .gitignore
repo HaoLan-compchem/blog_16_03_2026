@@ -7,6 +7,14 @@ electrophilicity_regression/best_svr_model_optuna.pkl
 electrophilicity_regression/crbn_lumo_dataset_with_fingerprints.csv
 covalent_docking_VS/WIZ/covalent_cereblon_binders_final_clean_target_cys.sdf
 
+# Regression GNN models
+electrophilicity_regression/best_gat_model.pt
+electrophilicity_regression/best_gcn_model.pt
+electrophilicity_regression/best_gin_model.pt
+
+# checkpoint files
+*.chkpt
+
 # Editors
 .vscode/
 
