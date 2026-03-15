@@ -5,6 +5,7 @@ covalency_classification/classic_ML_train_set.csv
 electrophilicity_regression/best_rf_model_optuna.pkl
 electrophilicity_regression/best_svr_model_optuna.pkl
 electrophilicity_regression/crbn_lumo_dataset_with_fingerprints.csv
+covalent_docking_VS/WIZ/covalent_cereblon_binders_final_clean_target_cys.sdf
 
 # Editors
 .vscode/
