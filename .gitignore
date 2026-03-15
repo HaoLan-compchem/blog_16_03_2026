@@ -1,0 +1,43 @@
+# Large files > 50MB
+covalent_docking_VS/shows.pse
+covalent_docking_VS/docking_background.pse
+covalency_classification/classic_ML_train_set.csv
+
+# Editors
+.vscode/
+
+# Python
+__pycache__/
+*.ipynb_checkpoints
+
+
+# QM Calculations
+QM_calculation/etkdg_mmff_conformers/
+QM_calculation/xtb_optimized_conformers/
+QM_calculation/*.pt
+
+# Covalent Docking
+covalent_docking_VS/WIZ/covalent_cereblon_binders_final_clean_target_cys.sdf
+
+
+# Database
+database/
+
+# GenAI
+genAI/trial_without_covalency/
+genAI/test_with_covalency/reinvent4_test/tb_stage1_0/events.out.tfevents.1772656145.lanhao.13723.0
+genAI/test_with_covalency/reinvent4_test/tb_stage1_0/events.out.tfevents.1772700904.lanhao.22151.0
+genAI/test_with_covalency/reinvent4_test/tb_stage1_0/events.out.tfevents.1772918662.lanhao.1003476.0
+genAI/test_with_covalency/reinvent4_test/tb_stage2_step15agent_0/events.out.tfevents.1772967843.lanhao.1150620.0
+genAI/test_with_covalency/reinvent4_test/tb_stage2_step50agent_0/events.out.tfevents.1772968509.lanhao.1152743.0
+
+
+
+# Other Large Files
+electrophilicity_regression/best_rf_model_optuna.pkl
+electrophilicity_regression/best_svr_model_optuna.pkl
+
+
+
+
+
