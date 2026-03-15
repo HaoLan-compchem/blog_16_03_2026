@@ -1,0 +1,21 @@
+
+run_type = "transfer_learning"
+device = "cuda:0"
+tb_logdir = "tb_TL"
+
+
+[parameters]
+
+num_epochs = 50
+save_every_n_epochs = 1
+batch_size = 100
+sample_batch_size = 2000
+
+input_model_file = "/mnt/d/blog_in_progress/genAI/test_with_covalency/reinvent4_test/stage1.chkpt"
+output_model_file = "/mnt/d/blog_in_progress/genAI/test_with_covalency/reinvent4_test/TL_reinvent.model"
+smiles_file = "/mnt/d/blog_in_progress/genAI/test_with_covalency/train_dataset.smi"
+validation_smiles_file = "/mnt/d/blog_in_progress/genAI/test_with_covalency/valid_dataset.smi"
+standardize_smiles = true
+randomize_smiles = true
+randomize_all_smiles = false
+internal_diversity = true

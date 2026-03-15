@@ -1,0 +1,43 @@
+21:26:26 <INFO> Started REINVENT 4.6.22 (C) AstraZeneca 2017, 2023 on 2026-03-07
+21:26:26 <INFO> Command line: /home/haolan/anaconda3/envs/reinvent4/bin/reinvent -l transfer_learning.log transfer_learning.toml
+21:26:26 <INFO> Reading run configuration from /mnt/d/blog_in_progress/genAI/test_with_covalency/reinvent4_test/transfer_learning.toml using format toml
+21:26:26 <INFO> User haolan on host lanhao
+21:26:26 <INFO> Python version 3.10.18
+21:26:26 <INFO> PyTorch version 2.7.1+cu128, git e2d141dbde55c2a4370fac5165b0561b6af4798b
+21:26:26 <INFO> PyTorch compiled with CUDA version 12.8
+21:26:26 <INFO> RDKit version 2025.03.3
+21:26:26 <INFO> Platform Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-with-glibc2.39
+21:26:26 <INFO> Number of PyTorch CUDA devices 1
+21:26:26 <WARN> 'use_cuda' is deprecated, use 'device' instead
+21:26:26 <INFO> Using CUDA device:0 NVIDIA GeForce RTX 5070 Laptop GPU
+21:26:26 <INFO> GPU memory: 6912 MiB free, 8150 MiB total
+21:26:26 <INFO> Writing TensorBoard summary to /mnt/d/blog_in_progress/genAI/test_with_covalency/reinvent4_test/tb_TL
+21:26:26 <INFO> Starting Transfer Learning
+21:26:26 <INFO> /mnt/d/blog_in_progress/genAI/test_with_covalency/reinvent4_test/stage1.chkpt has valid hash:
+{ 'comments': ['RL'],
+  'creation_date': 0,
+  'date_format': 'UNIX epoch',
+  'hash_id': '2e0975631595deeb275bf5c91737476a',
+  'hash_id_format': 'xxhash.xxh3_128_hex 3.5.0',
+  'model_id': '55d68f8a81c04f5a86304ebe1723a0ea',
+  'model_id_format': 'uuid.uuid4 3.10.12',
+  'origina_data_source': 'ChEMBL 25',
+  'updates': [1772918772.3903701]}
+21:26:26 <INFO> Number of network parameters: 5,805,602
+21:26:26 <INFO> Network architecture:
+RNN(
+  (_embedding): Embedding(34, 256)
+  (_rnn): LSTM(256, 512, num_layers=3, batch_first=True)
+  (_linear): Linear(in_features=512, out_features=34, bias=True)
+)
+21:26:26 <INFO> Using generator Reinvent
+21:26:26 <INFO> Applying filter default to input SMILES
+21:26:26 <WARN> "default" filter: Cc1[nH]c(=O)nc(S)c1C(=O)NC1CCC(=O)NC1=O is invalid
+21:26:28 <WARN> "default" filter: Cc1c(C(=O)NC2CCC(=O)NC2=O)sc2nnc(S)n12 is invalid
+21:26:29 <WARN> "default" filter: O=C1CCC(N2C(=O)c3ccc(S)cc3C2=O)C(=O)N1 is invalid
+21:26:31 <INFO> Read 5256 input SMILES from /mnt/d/blog_in_progress/genAI/test_with_covalency/train_dataset.smi
+21:26:31 <WARN> "default" filter: Cn1c(S)nnc1C(=O)NC1CCC(=O)NC1=O is invalid
+21:26:32 <INFO> Read 1316 validation SMILES from /mnt/d/blog_in_progress/genAI/test_with_covalency/valid_dataset.smi
+21:30:54 <INFO> Best validation loss (23.938) was at epoch 11
+21:30:54 <INFO> Peak main memory usage: 2015.734 MiB
+21:30:54 <INFO> Finished REINVENT on 2026-03-07
