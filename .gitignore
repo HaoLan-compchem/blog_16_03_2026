@@ -19,9 +19,6 @@ QM_calculation/etkdg_mmff_conformers/
 QM_calculation/xtb_optimized_conformers/
 QM_calculation/*.pt
 
-# Database
-database/
-
 # GenAI
 genAI/trial_without_covalency/
 genAI/test_with_covalency/reinvent4_test/tb_stage1_0/events.out.tfevents.1772656145.lanhao.13723.0
