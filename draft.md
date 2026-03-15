@@ -576,34 +576,34 @@ Using the same scaffold-based train/test split and a combination of validated Gr
 | GAT | Graph (node features + edge index) | 0.0476 | 0.1656 | 0.6818 | Fast (GPU) | .pth file ~ 12KB |
 | GIN | Graph (node features + edge index) | 0.0409 | 0.1447 | 0.7266 | Fast (GPU) | .pth file ~ 12KB |
 
-<font size="2"><b>Table 29.</b> Benchmark performances across 3 classic ML and 3 GNN models for the prediction of QM-calculated LUMO energies within our CRBN chemical space. (ps. Results are subject to minor stochastic variation based on the setting of random seed)</font><br>  
+<font size="2"><b>Table 29.</b> Benchmark performances across 3 classic ML and 3 GNN models for the prediction of QM-calculated LUMO energies within our CRBN chemical space. (<b>Note:</b> Actual results are subject to minor stochastic variation based on the setting of random seed.)</font><br>  
 
 <p style="text-align: justify;">
-The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.725) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration (also save RAM compared to classic models using CPU), and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember the SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
+The results highlight an interesting trend: For our focused CRBN dataset, the graph models showed no significant improvement over classical ML models in terms of <b>R2 score (coefficient of determination)</b>. Both <b>SVM</b> and <b>GIN</b> regressions were optimised to produce a strong fit (Test R2 up to 0.725) on the QM-calculated LUMO values. However, The GIN architecture offered a distinct engineering advantage: The training was significantly faster due to GPU acceleration (also save RAM compared to classic models using CPU), and the final model deployment is more efficient, requiring only the saved parameter dictionary (remember that SVM utilise RBF kernel). Meanwhile, <b>XGBoost</b> also proved to be a standout performer - high stability, minimal overfitting, lightweight storage as well as interpretable reasoning - making it an excellent alternative for rapid re-usage in production pipelines.
 </p>
 
 ## Testing Generative AI
 
 <p style="text-align: justify;">
-With a robust foundation of public data, virtual screening hits, and validated QSAR models as discussed above, I transitioned to the final phase: <b>De Novo Molecular Generation</b>. From the perspective of a computational medicinal chemist, I would seek the answer for two objectives: <b>Could these models further diversify our CRBN chemical space? Are they able to reliably "invent" novel, drug-like covalent candidates?</b>
+With a robust foundation of public data, virtual screening hits, and validated QSAR models as discussed above, I transitioned to the final phase: <b><i>De Novo</i> Molecular Generation</b>. From the perspective of computational medicinal chemistry, I would seek the answer for two objectives: <b>Could these models further diversify our CRBN chemical space? Are they able to reliably "invent" novel, drug-like covalent candidates?</b>
 </p>
 <p style="text-align: justify;">
-I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures and performs targeted generation. After some reading (DOIs in reference) and trials with command line wrapper, I explored 2 primary strategies:
+I first evaluated <b>smilesRNN</b>, a recurrent neural network (RNN)-based generative workflow developed by the MorganCThomas/Nxera team. By processing SMILES strings as sequences of tokens, the model learns the underlying grammar of chemical structures and performs targeted generation. After some reading (the DOI in reference) and trials with command line wrapper, I explored two primary strategies:
 
 1. <b>Direct Prior Training</b>: Training a "Prior" model exclusively on our curated CRBN chemical space, then sampling from this learned distribution to generate closely related analogs.
 
-2. <b>Available Prior Fine-Tuning</b>: Taking a large, pre-trained prior (e.g., reinvent model based on the entire ChEMBL database) and fine-tuning it on our focused CRBN dataset to bias the output toward the desired scaffold diversity.
+2. <b>Available Prior Fine-Tuning</b>: Taking a large, pre-trained prior (e.g., latest reinvent model based on the entire ChEMBL database) and fine-tuning it on our focused CRBN dataset to bias the output toward the desired scaffold diversity.
 </b>
 <p style="text-align: justify;">
 I also implemented the latest <b>REINVENT4</b> platform from AstraZeneca. Similar to the prior fine-tuning approach of <b>smilesRNN</b>, it offers more sophisticated transfer learning (TL) and reinforcement learning (RL) frameworks. By configuring .toml file in each step, multi-objective scoring functions could be integrated — including SMARTS filters for medicinal chemistry alerts (e.g., PAINS), QED for drug-likeness, and even external QSAR models etc.
 
-3. <b>TL & RL with Scoring</b>: Through transferring knowledge from a large prior to the CRBN-specific space, an appropriate agent was chosen to sample a "neighbouring" chemical space under reasonable constraints of score.
+3. <b>TL & RL with Scoring</b>: Through transferring knowledge from a large prior to the CRBN-specific space, an appropriate agent was chosen to sample a "neighbouring" chemical space under reasonable constraints.
 </p>
 <p style="text-align: justify;">
-A key technical challenge identified by my Gemini agent was that the publicly available reinvent prior model recognises only 59 tokens from smiles string. This vocabulary excludes stereochemical labels like '@' or explicit hydrogens such as '[H]' - This means our current CRBN dataset must be pre-processed to ensure token compatibility before the generative RL.
+A key technical challenge identified by my Gemini agent was that the publicly available reinvent prior model recognises only 59 tokens from SMILES string. This vocabulary excludes stereochemical labels like '@' or explicit hydrogens such as '[H]' - This means our current CRBN dataset must be pre-processed to ensure token compatibility before the generative RL.
 </p>
 <p style="text-align: justify;">
-Meanwhile, in the TL stage for building agent, I utilised a training/validation split and monitored the Negative Log-Likelihood (<b>NLL</b>) as the loss function. The metric of NLL was announced to evaluate how well the agent model is learning to mimic the specific grammar of our CRBN chemical space (<b>Figure 30</b>). Without any experience on how it would affect the subsequent RL phase, I decided to test two specific cases in <b>REINVENT4</b>:
+Meanwhile, in the TL stage for building agents, I employed a training/validation split and monitored the Negative Log-Likelihood (<b>NLL</b>) as the loss function. The metric of NLL was announced to evaluate how well the agent model is learning to mimic the specific grammar of our CRBN chemical space (<b>Figure 30</b>). Without any experience on how it would affect the subsequent RL phase, I decided to test two specific agents in <b>REINVENT4</b>:
 
 <b>a.</b> The final agent where all sample loss is optimised to a minimum (<b>step 50</b>)<br>
 <b>b.</b> The checkpoint agent when the validation loss reached to a stable plateau (<b>step 15</b>) - persumably offering better structural diversity before over-fitting to the training set?                   
@@ -613,7 +613,7 @@ Meanwhile, in the TL stage for building agent, I utilised a training/validation 
 
 ### Comparative Performance and Scaffold Diversity
 <p style="text-align: justify;">
-<b>Table 31</b> summarises the generative capacity of each approach, constrained by my tailored hierarchical post-processing pipeline for enumerating CRBN chemical space effectively. To ensure a high confidence in the identification of covalency, I employed a dual-classifier consensus: Only molecules flagged as positives/negatives by both of my <b>XGBoost</b> and <b>GIN</b> models were prioritised - This multi-model validation was found to significantly reduces artifacts in determining the modality of structure.
+<b>Table 31</b> summarises the generative capacity of each approach, constrained by my tailored hierarchical post-processing pipeline for enumerating CRBN chemical space effectively. To ensure a high confidence in the identification of covalency, I employed a dual-classifier consensus: Only molecules flagged as positives/negatives by both of my <b>XGBoost</b> and <b>GIN</b> models were prioritised - This multi-model validation was found to significantly reduces artifacts in determining two modalities.
 </p>
 
 | Approach | Targeted 'Mols' | Valid Smiles | Novel Mols | Mols with Imide Substructure | Mols without 'PAINS'  | Mols QED > 0.5 | Non/Covalent Candidates Passing both XGBoost & GIN Classifiers together |
@@ -629,13 +629,13 @@ Here are my observations and assumptions from the test above:
 
 1. <b>Distribution Fidelity</b>: Both smilesRNN approaches (Direct Prior and Fine-Tuning) showed high fidelity to the training set. For example, the ratio of generated non-covalent to covalent candidates (3~4:1) closely mirrors the original distribution, suggesting these models might be suitable for SAR exploitation tasks (such as hit expansion or lead optimisation).
 
-2. <b>Scaffold Innovation</b>: REINVENT4 demonstrated a significant 'drop-off' during my check with imide pharmacophore. While this results in lower efficiency to generate 'secure' hits, it indicates a higher tendency for <i>de novo</i> innovation. More bioisosteres or alternative cores could be explored for new ideas that deviate from the imide-heavy bias based on training set.
+2. <b>Scaffold Innovation</b>: REINVENT4 demonstrated a significant 'drop-off' during my check with imide pharmacophore. While this results in lower efficiency to generate 'secure' hits, it indicates a higher tendency for <i>de novo</i> innovation. More bioisosteres or alternative cores could be explored for new ideas beyond the imide-heavy bias based on training set.
 
-3. <b>Access to Drug-likeness</b>: All protocols are able to produce some high-quality candidates (QED > 0.5 and no undesired alert) for potential drug development in spite of ignored stereochemistry. I think <b>smilesRNN</b> is more user friendly without the need to supply explicit reward functions as configured in .toml file of <b>REINVENT4</b>.
+3. <b>Access to Drug-likeness</b>: All protocols are able to produce some high-quality candidates (QED > 0.5 and no undesired alert) for potential drug development in spite of ignored stereochemistry. I think <b>smilesRNN</b> is more user friendly without the need to supply explicit reward functions as configured in .toml file for RL stage of <b>REINVENT4</b>.
 
 </p>
 <p style="text-align: justify;">
-To check the final selected space in detail, some t-SNE plots were projected from two perspectives - class of covalency and source of datasets (<b>Figure 32</b>). Through the filtration, all generated models effectively enrich our CRBN chemical space. Different from <b>smilesRNN</b> where analogs were mainly filled around existing clusters, <b>REINVENT4</b> created a plenty of candidates in sparse regions (upper right) especially for noncovalent class. Interactive investigation of structures in KNIME revealed that <b>REINVENT4</b> preferentially explore the space of 'suspicious molecular glues' with <b>Phenyl Dihydrouracil (PD)</b> and <b>Phenyl 3-substituted-Glutarimide (P3G)</b> which rarely exist in our training set. I assume this is due to the addition of penalty weight on stereo-centres in reward functions which reduce the generation of chiral cores such as <b>Phenyl 2-substituted-Glutarimide (P2G)</b> in RL process.  
+To check the final selected space in detail, some t-SNE plots were projected from two perspectives - <b>class of covalency</b> and <b>source of datasets</b> (<b>Figure 32</b>). According to the upper row, our CRBN chemical space was enriched generally with all generative models following the filtration. Different from <b>smilesRNN</b> where analogs were mainly filled around existing clusters, <b>REINVENT4</b> created a plenty of candidates in sparse regions (top and right corners of t-SNE plot) especially for noncovalent class. Interactive investigation of structures in KNIME revealed that <b>REINVENT4</b> preferentially explore the space of 'suspicious molecular glues' with <b>Phenyl Dihydrouracil (PD)</b> and <b>Phenyl 3-substituted-Glutarimide (P3G)</b> which are rare in our training set. I assume this is due to the addition of penalty weight on stereo-centres in reward functions that reduce the generation of chiral cores such as <b>Phenyl 2-substituted-Glutarimide (P2G)</b> in RL process.  
 </p>
 <img src="photos_and_videos/figure_32.png" alt="figure32" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/>
 <font size="2"><b>Figure 32</b>. A series of t-SNE plots based on the Morgan fingerprints (size 8192, radius 2, chirality ignored) showing the variation of CRBN chemical space from training set to post-processed generated set respectively.</font>
@@ -652,9 +652,9 @@ For the large-scale virtual screening, I think <b>three molecular descriptors</b
 
 1. <b>logP (Logarithm of the Partition coefficient)</b> - Its ideal range is likely between 1.0 and 3.5 for the desired <b>lipophilicity</b> (logD if pH considered). Using <b>RDKit’s fragment-based calculation</b> is a robust baseline for this domain. 
 
-2. <b>TPSA (Topological Polar Surface Area)</b> - As a proxy for <b>permeability and oral bioavailability</b>, I monitored TPSA with an upper threshold of 130 Å². While such <b>2D-based</b> value is a "quick and dirty" metric, it remains a gold standard for initial prioritisation in molecular glue and PROTAC design.     
+2. <b>TPSA (Topological Polar Surface Area)</b> - As a proxy for <b>permeability and oral bioavailability</b>, I monitored TPSA with an upper threshold of 130 Å². While such <b>2D-based</b> value is a "quick and dirty" metric, it remains a gold standard for initial prioritisation in MG and PROTAC design.     
 
-3. <b>logS (Logarithm of Water Solubility)</b> - I aimed for the value above -4.0 to have <b>sufficient distribution in aqueous environment</b>. For corresponding calculation, I prefer to use <b>ESOL approach</b> (Estimated SOLubility) - A reliable linear regression model based on clogP, MW, nRotB and Aromatic proportion features, as established by Delaney and refined by Pat Walters.
+3. <b>logS (Logarithm of Water Solubility)</b> - Such value above -4.0 could indicate <b>sufficient distribution in aqueous environment</b>. For corresponding calculation, I prefer to use <b>ESOL approach</b> (Estimated SOLubility) - A reliable linear regression model based on clogP, MW, nRotB and Aromatic proportion features, as established by Delaney and refined by Pat Walters.
 </p>
 <p style="text-align: justify;">
 As shown in the distribution analysis (<b>Figure 33</b>), the majority of our generated candidates after post-processing fall within these desired physicochemical regions. Interestingly, <b>smilesRNN</b> (especially without a global prior) tended to generate more polar, hydrophilic molecules that closely matched the training set's local distribution. In contrast, <b>REINVENT4</b> explored a more narrow range of lipophilic "sweet spot".
@@ -666,16 +666,16 @@ As shown in the distribution analysis (<b>Figure 33</b>), the majority of our ge
 To visualise some of novel covalent products meeting all three criteria, I used the <b>mols2grid</b> module to list AI-generated candidates that passed the <b>dual-classifier check</b> (XGBoost+GIN) and maintained <b>high drug-likeness</b> (QED > 0.67). The resulting 82 final structures (<b>Video 34</b>) represent a highly diverse chemical space including:
 
 * <b>Novel PD-based CRBN molecular glues</b>
-* <b>Imide in 7-membered rings</b> (albeit with one exception of open imide at first)
+* <b>Imide in 7-membered rings</b> (albeit with one exception of open imide at the first)
 * <b>All sets of reactive warhead as expected</b>
 
 <p style="text-align: justify;">
-I believe this AI-enhanced chemical space derived from open cheminformatic docking dataset, combined with my rational supervision through property-based optimisation strategy, has yielded a rich pipeline of covalent CRBN-binding candidates ready for experimental validation.
+I believe this AI-enhanced chemical space derived from open and cheminformatic docking dataset, combined with my rational supervision through property-based optimisation strategy, has yielded a rich pipeline of covalent CRBN-binding candidates ready for synthetic, structual and biological validations if any of my reader wants to explore...
 </p>
 <video controls>
   <source src="photos_and_videos/video_34.mp4" type="video/mp4">
 </video>
-<font size="2"><b>Video 34</b>. The monitored generative AI product of some drug-like candidates in covalent CRBN chemical space, as shown by mols2grid module with RDKit-calculated properties.</font>
+<font size="2"><b>Video 34</b>. The monitored generative AI product of some drug-like candidates in covalent CRBN chemical space, as shown by <i>mols2grid</i> module with RDKit-calculated properties.</font>
 <br><br>
 
 ## Summary and Outlook
@@ -705,7 +705,13 @@ In this blog, I explored the CRBN chemical space with a focus on sparse covalent
 
 [DOI](https://chemrxiv.org/doi/pdf/10.26434/chemrxiv-2025-k1xlg) - The QSAR modelling study with GNN architectures published from GSK
 
-[DOI](https://pubs.rsc.org/en/content/articlelanding/2024/dd/d3dd00224a) - The QM computation for estimating electrophilicty with applications to covalent inhibitors published from Bayer 
+[DOI](https://pubs.rsc.org/en/content/articlelanding/2024/dd/d3dd00224a) - The QM computation for estimating electrophilicty with applications to covalent inhibitors published from Bayer
+
+[DOI]() - smilesRNN
+
+[DOI]() - REINVENT4
+
+This personal blog post was made possible with excellent open-source, academic, or non-commercial-use software, models, toolkits and platforms below under corresponding licenses:
 
 ## Disclaimer
 <p style="text-align: justify;">
