@@ -22,10 +22,31 @@ electrophilicity_regression/best_gin_model.pt
 __pycache__/
 *.ipynb_checkpoints
 
+# Docking Calculations (to upload in my huggingface)
+covalent_docking_VS/IKZF2/7LPS/
+covalent_docking_VS/IKZF2/7U8F/
+covalent_docking_VS/IKZF2/cov_ligands/
+covalent_docking_VS/IKZF2/final_docked_poses/
+covalent_docking_VS/WIZ/8TZX_a/
+covalent_docking_VS/WIZ/9DJX_a/
+covalent_docking_VS/WIZ/9DJX_b/
+covalent_docking_VS/WIZ/cov_ligands/
+covalent_docking_VS/WIZ/final_docked_poses/
+covalent_docking_VS/binary/4TZ4/
+covalent_docking_VS/binary/5V3O/
+covalent_docking_VS/binary/8OJH/
+covalent_docking_VS/binary/cov_ligands/
+covalent_docking_VS/binary/final_docked_poses/
+covalent_docking_test/4TZ4/
+covalent_docking_test/5V3O/
+covalent_docking_test/8OJH/
+covalent_docking_test/cov_ligands/
+covalent_docking_test/final_docked_poses/
+
 # QM Calculations (to upload in my huggingface)
 QM_calculation/etkdg_mmff_conformers/
 QM_calculation/xtb_optimized_conformers/
-QM_calculation/*.pt
+QM_calculation/uma-s-1p1.pt
 
 # GenAI
 genAI/trial_without_covalency/
