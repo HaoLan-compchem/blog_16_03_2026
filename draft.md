@@ -631,7 +631,7 @@ Here are my observations and assumptions from the test above:
 
 2. <b>Scaffold Innovation</b>: REINVENT4 demonstrated a significant 'drop-off' during my check with imide pharmacophore. While this results in lower efficiency to generate 'secure' hits, it indicates a higher tendency for <i>de novo</i> innovation. More bioisosteres or alternative cores could be explored for new ideas beyond the imide-heavy bias based on training set.
 
-3. <b>Access to Drug-likeness</b>: All protocols are able to produce some high-quality candidates (QED > 0.5 and no undesired alert) for potential drug development in spite of ignored stereochemistry. I think <b>smilesRNN</b> is more user friendly without the need to supply explicit reward functions as configured in .toml file for RL stage of <b>REINVENT4</b>.
+3. <b>Access to Drug-likeness</b>: All protocols are able to produce some high-quality candidates (QED > 0.5 and no undesired alert) for potential drug development in spite of ignored stereochemistry. I think <b>smilesRNN</b> is more user friendly without the need to supply explicit reward functions as configured in .toml file for RL stage of <b>REINVENT4</b> (Note: I have not tried any extra function such as <i>MolScore</i> or <i>PromptSMILES</i> that recently added on the base of <b>smilesRNN</b>).
 
 </p>
 <p style="text-align: justify;">
@@ -670,7 +670,7 @@ To visualise some of novel covalent products meeting all three criteria, I used 
 * <b>All sets of reactive warhead as expected</b>
 
 <p style="text-align: justify;">
-I believe this AI-enhanced chemical space derived from open and cheminformatic docking dataset, combined with my rational supervision through property-based optimisation strategy, has yielded a rich pipeline of covalent CRBN-binding candidates ready for synthetic, structual and biological validations if any of my reader wants to explore...
+I believe this AI-enhanced chemical space derived from open and cheminformatic docking dataset, combined with my rational supervision through property-based optimisation strategy, has yielded a rich pipeline of covalent CRBN-binding candidates ready for synthetic, structual and biological validations if any reader would like to explore...
 </p>
 <video controls>
   <source src="photos_and_videos/video_34.mp4" type="video/mp4">
@@ -682,36 +682,56 @@ I believe this AI-enhanced chemical space derived from open and cheminformatic d
 <p style="text-align: justify;">
 In this blog, I explored the CRBN chemical space with a focus on sparse covalent modalities. It highlights <b>the powerful synergy between classical computational chemistry/cheminformatics and modern AI workflows</b>. By moving from comprehensive data curation and into the physics/ML-integrated drug design, we have transformed raw, imbalanced, unlabelled public datasets to productive libraries refined for drug discovery and development practically. I think there are some key takeaways from this blog:
 
-1. <b>We must addrees the bias when deal with any dataset in the public.</b> It would be benefitial to enrich the chemical space with <b>speciallised libraries</b> and <b>patent mining</b> correspondingly. With human-level cheminformatic skills, this enabled me to design and develop potential candidate pool targeting covalent residues in TPD field.
+1. <b>We must addrees the bias when deal with any dataset in the public.</b> It would be benefitial to enrich the chemical space with <b>speciallised library</b> and <b>patent mining</b> correspondingly. With human-level cheminformatic skills, this enabled me to design and develop potential candidate pool targeting covalent residues in the space of CRBN modulators.
 
 2. <b>Virtual screening is more than simply doing the docking.</b> By implementing <b>pharmacophore shape constraints</b> and <b>Shortest Bonding Pathlength (SBP) filters</b>, I ensured that our covalent "inventions" were target-focused and structurally plausible within CRBN and interfaces for IKZF2 and WIZ.
 
-3. For structural identification and regressive analysis, <b>satisfactory approximation, generalisation and automation could be achieved by most fine-tuned ML models based on well-distributed data</b>. The QSAR modelling in my study domain is not very sensitive to feature type or architecture choice, no matter it is classic fingerprint tree or graph neural network... I believe both <b>data quality</b> by annotation or QM and <b>model deployability</b> in engineering are overlooked factors to consider for drug discovery industry.
+3. For structural identification and regressive analysis, <b>satisfactory approximation, generalisation and automation could be achieved by most fine-tuned ML models based on well-distributed data</b>. The QSAR modelling in my study domain is not very sensitive to feature type or architecture choice, no matter it is classical fingerprint tree or popular graph neural network... I believe both <b>data quality</b> by annotation or QM and <b>model deployability</b> in engineering are overlooked factors to consider for drug discovery industry.
 
-4. From my perspective as application scientist, <b>AI molecular generation with RL represents a promising future direction</b> that now established on appropriate data/prior of available chemical space together with the agent rewarded by desired metrics. For our computational drug designers at the moment, it is still necessary to keep monitoring these generative progress with <b>a human mindset of biological targets as well as physicochemical, ADME, and DPMK properties</b>.
+4. From my perspective as application scientist, <b>AI molecular generation with RL represents a promising future direction</b> that now established on <b>appropriate data/prior of available chemical space</b> together with <b>the agent rewarded by desired metrics</b>. For computational drug designer at the moment, it is still necessary to keep monitoring these generative progress with <b>a human mindset of biological targets in SBDD physics as well as necessary properties for ADME and DPMK</b>.
 </p>
 
-## Data and Code Availability
+## Data, Code and Model Availability
 
-[Hao Lan's Github Repository](https://github.com/HaoLan-compchem/blog_15_03_2026)
+[Hao Lan's Github Repository](https://github.com/HaoLan-compchem/blog_16_03_2026)
 
 [Hao Lan's HuggingFace Storage](https://)
 
 ## Reference and Acknowledgement
 
-[Enamine](https://https://enamine.net/compound-libraries/molecular-glues) link for molecular glues librarys
+This personal blog post was made possible with excellent open-source software, database, models, toolkits, platforms and publications below under corresponding licenses:
 
-[DOI](https://pubs.rsc.org/en/content/articlepdf/2022/cb/d2cb00078d) - The research of covalent Cereblon modulators published by Lyn Jones group
+[RDKit](https://github.com/rdkit/rdkit): The fundamental cheminformatic tookits used for chemical data processing, Murcko scaffold-based splitting, Morgan fingerprints generation, ETKDG conformer search, descriptor calculations etc. in this blog.
 
-[DOI](https://chemrxiv.org/doi/pdf/10.26434/chemrxiv-2025-k1xlg) - The QSAR modelling study with GNN architectures published from GSK
+[KNIME](https://www.knime.com/): The pipeline platform used here for tabular cheminformatic database curation, analysis and visualisation.
 
-[DOI](https://pubs.rsc.org/en/content/articlelanding/2024/dd/d3dd00224a) - The QM computation for estimating electrophilicty with applications to covalent inhibitors published from Bayer
+[Enamine](https://https://enamine.net/compound-libraries/molecular-glues): The link for latest molecular glues library in their commercial store.
 
-[DOI]() - smilesRNN
+[DOI](https://pubs.rsc.org/en/content/articlepdf/2022/cb/d2cb00078d): The research of covalent Cereblon modulators published by Lyn Jones group in Dana-Farber.
 
-[DOI]() - REINVENT4
+[DOI](https://chemrxiv.org/doi/pdf/10.26434/chemrxiv-2025-k1xlg): The QSAR modelling study with GNN architectures published from GSK.
 
-This personal blog post was made possible with excellent open-source, academic, or non-commercial-use software, models, toolkits and platforms below under corresponding licenses:
+[TechOpenCADD](https://projects.volkamerlab.org/teachopencadd/talktorials): The series of deep learning tutorials that inspired GNN works for QSAR study here.
+
+[DeepChem](https://deepchem.io/): The deep learning module used to prepare and featurise chemical graph data in QSAR.
+
+[Pytorch](https://pytorch.org/): The foundation open-source deep learning framework used in GNN modelling.
+
+[Scikit-learn](https://scikit-learn.org/stable/): The platform for classical ML models in QSAR study.
+
+[Optuna](https://optuna.org/): The framework for hyperparameter optimisation and model tuning specifically with Bayesian algorithm.    
+
+[DOI](https://pubs.rsc.org/en/content/articlelanding/2024/dd/d3dd00224a): The paper of QM computation for estimating electrophilicty with applications to covalent inhibitors published from Bayer
+
+[XTB](https://github.com/grimme-lab/xtb): The semi-empirical quantum mechanics program used here for conformational geometry optimisations and electronic property calculations.
+
+[FAIRCHEM](https://github.com/facebookresearch/fairchem): The Meta's UMA model as SOTA machine-learning force field used here for single-point energy calculation and Boltzmann averaging of conformation-dependent electronic properties.
+
+[AutoDock-GPU](https://github.com/ccsb-scripps/AutoDock-GPU): The GPU version of AutoDock 4 used here for covalent docking with flexible sidechain mode.
+
+[smilesRNN](https://github.com/MorganCThomas/SMILES-RNN): The generative scripts released by MorganCThomas/Nxera team with their publication [DOI](https://doi.org/10.1186/s13321-022-00646-z).
+
+[REINVENT4](https://github.com/MolecularAI/REINVENT4): The latest generative platform developed from AstraZeneca with their publication [DOI](https://doi.org/10.1186/s13321-024-00812-5).
 
 ## Disclaimer
 <p style="text-align: justify;">
@@ -720,4 +740,4 @@ The entirety of the content, methodologies, analyses, and conclusions presented 
 
 ## Additional Note
 <p style="text-align: justify;">
-Due to few unforeseen events in my career and family, I would pause the update for this series of technical blog for a period of time. Meanwhile, there are some emerging matters I need to prioritise sooner rather than later - gain professional knowledge in ADME and DMPK, practice communication for CADD technical leadership and software product management in industry, stick at body maintenance for longer-lasting health and the next generation etc... all of which are becoming even more important nowadays in a world with agentic AI.               
+Due to few unforeseen events in my career and family, I would pause the update for this series of technical blog for a period of time. Meanwhile, there are some emerging matters I need to prioritise sooner rather than later - gain professional knowledge in ADME/DMPK, practice communication for CADD technical leadership and software product management in industry, stick at body maintenance for personal health and life balance for my next generation etc... all of which are becoming even more important nowadays in a world with AGI.               
