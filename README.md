@@ -2,6 +2,8 @@
 
 This repository contains the data, code, and pipelines associated with the study of **Cereblon (CRBN)-based binders and degraders**, focusing on the exploration of covalent modalities through traditional cheminformatics, quantum mechanics (QM), and artificial intelligence.
 
+<img src="dashboard.png" alt="dashboard" width="1080px" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;"/><br>
+
 ## Table of Contents
 - [Overview](#overview)
 - [Repository Structure](#repository-structure)
