@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Large files > 50MB (to upload in my huggingface)
 covalent_docking_VS/shows.pse
 covalent_docking_VS/docking_background.pse
@@ -64,15 +63,3 @@ database/*_database/Enamine*
 
 
 
-=======
-*.xtc
-*.dcd
-*.nc
-*.pdb
-*.densities
-*.gbw
-*.molden
-*.model
-*.pt
-/papers/
->>>>>>> ecd86819 (2026 edit)
