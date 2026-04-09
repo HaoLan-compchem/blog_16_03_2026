@@ -1,0 +1,14 @@
+name: vina
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - rdkit
+  - openbabel
+  - pymol-open-source
+  - numpy
+  - scipy
+  - matplotlib
+  - jupyter
+  - ipykernel

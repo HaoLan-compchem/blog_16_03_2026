@@ -1,0 +1,12 @@
+name: autodock
+channels:
+  - conda-forge
+  - cgohlke
+  - defaults
+dependencies:
+  - python=3.9
+  - rdkit
+  - numpy
+  - autodock-vina
+  - jupyter
+  - ipykernel
